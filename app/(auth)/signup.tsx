@@ -1,10 +1,16 @@
+import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { Text, View } from 'react-native';
 
 export default function SignupScreen() {
   return (
     <View className="flex-1 items-center justify-center gap-4 bg-white px-6">
-      <Text className="text-3xl font-bold text-primary">🐾 DogWalker</Text>
+      <Image
+        source={require('@/assets/images/logo.png')}
+        style={{ width: 96, height: 96 }}
+        contentFit="contain"
+      />
+      <Text className="text-2xl font-bold text-gray-900">DogWalker</Text>
       <Text className="text-base text-muted">Create your account</Text>
 
       <View className="w-full gap-3 pt-4">

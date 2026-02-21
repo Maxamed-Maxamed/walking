@@ -1,9 +1,15 @@
+import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { Text, View } from 'react-native';
 
 export default function RoleSelectScreen() {
   return (
     <View className="flex-1 items-center justify-center gap-6 bg-white px-6">
+      <Image
+        source={require('@/assets/images/logo.png')}
+        style={{ width: 80, height: 80 }}
+        contentFit="contain"
+      />
       <Text className="text-2xl font-bold text-gray-900">How will you use DogWalker?</Text>
       <Text className="text-center text-sm text-muted">You can always add the other role later.</Text>
 
