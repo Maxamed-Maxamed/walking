@@ -47,3 +47,4 @@ app-example
 .github\instructions\codacy.instructions.md
 .github/copilot-instructions.md
 .env
+.kiro/settings/mcp.json
