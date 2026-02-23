@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #f6f4ef;
+    font-family: 'Trebuchet MS', 'Gill Sans MT', 'Segoe UI', sans-serif;
+  }
+}

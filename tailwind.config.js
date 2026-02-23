@@ -5,13 +5,22 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#4F46E5',
-        secondary: '#10B981',
-        surface: { DEFAULT: '#F8FAFC', dark: '#1E293B' },
-        muted: '#94A3B8',
+        canvas: '#F6F4EF',
+        surface: { DEFAULT: '#FFFDF8', dark: '#1E293B' },
+        ink: '#172033',
+        border: '#D7D3C9',
+        primary: '#E76F51',
+        secondary: '#2A9D8F',
+        accent: '#264653',
+        muted: '#6B7280',
         error: '#EF4444',
         warning: '#F59E0B',
         success: '#22C55E',
+      },
+      fontFamily: {
+        display: ['Avenir Next', 'Trebuchet MS', 'Segoe UI'],
+        body: ['Gill Sans MT', 'Trebuchet MS', 'Segoe UI'],
+        monoWire: ['Courier New', 'monospace'],
       },
     },
   },
