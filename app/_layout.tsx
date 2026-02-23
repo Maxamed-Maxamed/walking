@@ -7,11 +7,9 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
-import { Platform } from 'react-native';
 import 'react-native-reanimated';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 
-import { DogWalkerSplash } from '@/components/ui/dogwalker-splash';
 
 SplashScreen.setOptions({
   duration: 450,
@@ -65,17 +63,6 @@ export default function RootLayout() {
   }, [appReady]);
 
   if (!appReady) {
-    // Native platforms keep the configured native splash visible.
-    // Web has no native splash, so render the branded fallback.
-    if (Platform.OS === 'web') {
-      return (
-        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-          <StatusBar style="dark" />
-          <DogWalkerSplash />
-        </SafeAreaProvider>
-      );
-    }
-
     return null;
   }
 
