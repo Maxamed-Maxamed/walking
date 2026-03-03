@@ -1,8 +1,35 @@
 import { Image } from 'expo-image';
-import { Link } from 'expo-router';
-import { Text, View } from 'react-native';
+import { useLocalSearchParams, useRouter, Link } from 'expo-router';
+import { useState } from 'react';
+import { Alert, Pressable, Text, TextInput, View } from 'react-native';
+import { supabase } from '@/lib/supabase';
+import type { UserRole } from '@/lib/auth-context';
 
 export default function LoginScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams<{ role?: string }>();
+  const role = (params.role ?? 'owner') as UserRole;
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin() {
+    if (!email || !password) {
+      Alert.alert('Error', 'Email and password are required.');
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) {
+      Alert.alert('Login failed', error.message);
+    } else {
+      // Go back to role-select with the role pre-selected — auto-continue will fire
+      router.replace({ pathname: '/(auth)/role-select', params: { role } });
+    }
+  }
+
   return (
     <View className="flex-1 items-center justify-center gap-4 bg-white px-6">
       <Image
@@ -14,20 +41,42 @@ export default function LoginScreen() {
       <Text className="text-base text-muted">Sign in to your account</Text>
 
       <View className="w-full gap-3 pt-4">
-        <View className="w-full rounded-xl border border-gray-200 bg-surface px-4 py-3">
-          <Text className="text-sm text-muted">Email</Text>
-        </View>
-        <View className="w-full rounded-xl border border-gray-200 bg-surface px-4 py-3">
-          <Text className="text-sm text-muted">Password</Text>
-        </View>
+        <TextInput
+          className="w-full rounded-xl border border-gray-200 bg-surface px-4 py-3 text-gray-900"
+          placeholder="Email"
+          placeholderTextColor="#94A3B8"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoComplete="email"
+          editable={!loading}
+        />
+        <TextInput
+          className="w-full rounded-xl border border-gray-200 bg-surface px-4 py-3 text-gray-900"
+          placeholder="Password"
+          placeholderTextColor="#94A3B8"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoComplete="current-password"
+          editable={!loading}
+        />
 
-        <View className="mt-2 w-full rounded-xl bg-primary py-4">
-          <Text className="text-center text-base font-semibold text-white">Sign In</Text>
-        </View>
+        <Pressable
+          className="mt-2 w-full rounded-xl bg-primary py-4 disabled:opacity-50"
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          <Text className="text-center text-base font-semibold text-white">
+            {loading ? 'Signing in…' : 'Sign In'}
+          </Text>
+        </Pressable>
       </View>
 
-      <Link href="/(auth)/signup">
-          <Text className="text-sm text-primary">Don't have an account? Sign up</Text>      </Link>
+      <Link href={{ pathname: '/(auth)/role-select', params: { role } }}>
+        <Text className="text-sm text-primary">Don't have an account? Get started</Text>
+      </Link>
     </View>
   );
 }

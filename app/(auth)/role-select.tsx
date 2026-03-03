@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,14 +8,34 @@ import { useAuth } from '@/lib/auth-context';
 import type { UserRole } from '@/lib/auth-context';
 
 export default function RoleSelectScreen() {
-  const { switchRole } = useAuth();
+  const { session, isLoading, switchRole } = useAuth();
+  const router = useRouter();
+  const params = useLocalSearchParams<{ role?: string }>();
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
 
-  const handleContinue = () => {
-    if (selectedRole) {
-      switchRole(selectedRole);
+  // Auto-continue when returning from signup/login with a pre-selected role
+  useEffect(() => {
+    if (!isLoading && session && params.role) {
+      const role = params.role as UserRole;
+      setSelectedRole(role);
+      switchRole(role);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, isLoading]);
+
+  function handleCreateAccount() {
+    if (!selectedRole) return;
+    router.push({ pathname: '/(auth)/signup', params: { role: selectedRole } });
+  }
+
+  function handleSignIn() {
+    if (!selectedRole) return;
+    router.push({ pathname: '/(auth)/login', params: { role: selectedRole } });
+  }
+
+  function handleContinue() {
+    if (selectedRole) switchRole(selectedRole);
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-[#FFF8F0]" edges={['top', 'bottom']}>
@@ -34,7 +55,10 @@ export default function RoleSelectScreen() {
         
         {/* Heading */}
         <Text className="mt-10 text-center text-2xl font-bold text-[#78350F]">
-          Choose Your Role
+          Who are you?
+        </Text>
+        <Text className="mt-2 text-center text-base text-[#92400E]">
+          Choose how you'll use DogWalker
         </Text>
 
         {/* Role Cards */}
@@ -45,9 +69,7 @@ export default function RoleSelectScreen() {
             description="Find trusted walkers for your furry friend"
             isSelected={selectedRole === 'owner'}
             onPress={() => { setSelectedRole('owner'); }}
-            
           />
-
           <RoleCard
             emoji="🦮"
             title="Dog Walker"
@@ -57,19 +79,42 @@ export default function RoleSelectScreen() {
           />
         </View>
 
-        {/* Continue Button */}
-        <Pressable
-          onPress={handleContinue}
-          disabled={!selectedRole}
-          className={`mt-10 w-full rounded-2xl py-4 ${
-            selectedRole ? 'bg-amber-500' : 'bg-gray-300'
-          }`}>
-          <Text className={`text-center text-lg font-bold ${
-            selectedRole ? 'text-white' : 'text-gray-500'
-          }`}>
-            Continue
-          </Text>
-        </Pressable>
+        {/* CTA buttons — vary based on auth state */}
+        {session ? (
+          // Authenticated: just continue with selected role
+          <Pressable
+            onPress={handleContinue}
+            disabled={!selectedRole}
+            className={`mt-10 w-full rounded-2xl py-4 ${
+              selectedRole ? 'bg-amber-500' : 'bg-gray-300'
+            }`}>
+            <Text className={`text-center text-lg font-bold ${
+              selectedRole ? 'text-white' : 'text-gray-500'
+            }`}>
+              Continue
+            </Text>
+          </Pressable>
+        ) : (
+          // Unauthenticated: show signup + login options
+          <View className={`mt-10 w-full gap-3 transition-opacity ${selectedRole ? 'opacity-100' : 'opacity-40'}`}>
+            <Pressable
+              onPress={handleCreateAccount}
+              disabled={!selectedRole}
+              className="w-full rounded-2xl bg-amber-500 py-4">
+              <Text className="text-center text-lg font-bold text-white">
+                Create Account
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={handleSignIn}
+              disabled={!selectedRole}
+              className="w-full rounded-2xl border-2 border-amber-500 py-4">
+              <Text className="text-center text-lg font-bold text-amber-600">
+                Sign In
+              </Text>
+            </Pressable>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -94,13 +139,8 @@ function RoleCard({
     transform: [{ scale: scale.value }],
   }));
 
-  const handlePressIn = () => {
-    scale.value = withSpring(0.97);
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1);
-  };
+  const handlePressIn = () => { scale.value = withSpring(0.97); };
+  const handlePressOut = () => { scale.value = withSpring(1); };
 
   return (
     <Animated.View style={animatedStyle}>

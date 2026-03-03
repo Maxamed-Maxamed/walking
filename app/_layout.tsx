@@ -26,7 +26,7 @@ SplashScreen.setOptions({
   duration: 450,
   fade: true,
 });
-void SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch(() => null);
 
 export const unstable_settings = {
   anchor: '(auth)',
