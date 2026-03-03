@@ -1,5 +1,6 @@
-import '../global.css';
+import '@/global.css';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { Asset } from 'expo-asset';
 import { useFonts } from 'expo-font';
@@ -9,6 +10,16 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import 'react-native-reanimated';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
+import { AuthProvider } from '@/lib/auth-context';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: true,
+    },
+  },
+});
 
 
 SplashScreen.setOptions({
@@ -23,7 +34,7 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const splashStartedAt = useRef(Date.now());
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     ...Ionicons.font,
   });
   const [assetsLoaded, setAssetsLoaded] = useState(false);
@@ -44,7 +55,7 @@ export default function RootLayout() {
     };
   }, []);
 
-  const appReady = fontsLoaded && assetsLoaded;
+  const appReady = (fontsLoaded || !!fontError) && assetsLoaded;
 
   useEffect(() => {
     if (!appReady) return;
@@ -67,14 +78,18 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(owner)" />
-        <Stack.Screen name="(walker)" />
-      </Stack>
-      <StatusBar style="auto" />
-    </SafeAreaProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="(auth)" />
+            <Stack.Screen name="(owner)" />
+            <Stack.Screen name="(walker)" />
+          </Stack>
+          <StatusBar style="auto" />
+        </SafeAreaProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

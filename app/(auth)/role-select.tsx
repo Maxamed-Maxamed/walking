@@ -1,21 +1,18 @@
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-type Role = 'owner' | 'walker' | null;
+import { useAuth } from '@/lib/auth-context';
+import type { UserRole } from '@/lib/auth-context';
 
 export default function RoleSelectScreen() {
-  const router = useRouter();
-  const [selectedRole, setSelectedRole] = useState<Role>(null);
+  const { switchRole } = useAuth();
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
 
   const handleContinue = () => {
-    if (selectedRole === 'owner') {
-      router.push('/(owner)/(tabs)/');
-    } else if (selectedRole === 'walker') {
-      router.push('/(walker)/(tabs)/jobs');
+    if (selectedRole) {
+      switchRole(selectedRole);
     }
   };
 
@@ -47,7 +44,8 @@ export default function RoleSelectScreen() {
             title="Dog Owner"
             description="Find trusted walkers for your furry friend"
             isSelected={selectedRole === 'owner'}
-            onPress={() => setSelectedRole('owner')}
+            onPress={() => { setSelectedRole('owner'); }}
+            
           />
 
           <RoleCard
@@ -55,7 +53,7 @@ export default function RoleSelectScreen() {
             title="Dog Walker"
             description="Earn money walking dogs in your neighborhood"
             isSelected={selectedRole === 'walker'}
-            onPress={() => setSelectedRole('walker')}
+            onPress={() => { setSelectedRole('walker'); }}
           />
         </View>
 

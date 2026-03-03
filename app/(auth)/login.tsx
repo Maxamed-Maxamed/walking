@@ -27,8 +27,7 @@ export default function LoginScreen() {
       </View>
 
       <Link href="/(auth)/signup">
-        <Text className="text-sm text-primary">Don&apos;t have an account? Sign up</Text>
-      </Link>
+          <Text className="text-sm text-primary">Don't have an account? Sign up</Text>      </Link>
     </View>
   );
 }
