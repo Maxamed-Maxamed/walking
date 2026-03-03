@@ -1,5 +1,5 @@
 import { useRouter, useSegments } from 'expo-router';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
 import type { Session, User } from '@supabase/supabase-js';
@@ -24,6 +24,19 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
+
+/** Pure helper — returns the route to navigate to, or null if no redirect needed. */
+function resolveRoute(
+  session: Session | null,
+  activeRole: UserRole | null,
+  inAuthGroup: boolean,
+): string | null {
+  if (!session) return inAuthGroup ? null : '/(auth)/role-select';
+  if (!inAuthGroup) return null;
+  if (activeRole === 'owner') return '/(owner)/(tabs)';
+  if (activeRole === 'walker') return '/(walker)/(tabs)/jobs';
+  return null;
+}
 
 async function fetchProfile(user: User): Promise<UserProfile | null> {
   const { data, error } = await supabase
@@ -80,25 +93,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isLoading) return;
+    const route = resolveRoute(session, activeRole, segments[0] === '(auth)');
+    if (route) router.replace(route as Parameters<typeof router.replace>[0]);
+  }, [session, segments, isLoading, activeRole, router]);
 
-    const inAuthGroup = segments[0] === '(auth)';
-
-    if (!session && !inAuthGroup) {
-      router.replace('/(auth)/role-select');
-    } else if (session && inAuthGroup) {
-      if (activeRole === 'owner') {
-        router.replace('/(owner)/(tabs)');
-      } else if (activeRole === 'walker') {
-        router.replace('/(walker)/(tabs)/jobs');
-      }
-      // no activeRole → stay on role-select
-    }
-  }, [session, segments, isLoading, activeRole]);
-
-  function switchRole(role: UserRole) {
+  const switchRole = useCallback((role: UserRole) => {
     setActiveRole(role);
     setRoles((prev) => (prev.includes(role) ? prev : [...prev, role]));
-  }
+  }, []);
 
   return (
     <AuthContext.Provider value={{ session, profile, roles, activeRole, switchRole, isLoading }}>

@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,15 +13,17 @@ export default function RoleSelectScreen() {
   const params = useLocalSearchParams<{ role?: string }>();
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
 
+  const hasContinued = useRef(false);
+
   // Auto-continue when returning from signup/login with a pre-selected role
   useEffect(() => {
-    if (!isLoading && session && params.role) {
+    if (!isLoading && session && params.role && !hasContinued.current) {
+      hasContinued.current = true;
       const role = params.role as UserRole;
       setSelectedRole(role);
       switchRole(role);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, isLoading]);
+  }, [isLoading, session, params.role, switchRole]);
 
   function handleCreateAccount() {
     if (!selectedRole) return;
