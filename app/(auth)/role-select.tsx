@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '@/lib/auth-context';
+import { useAuth, parseUserRole } from '@/lib/auth-context';
 import type { UserRole } from '@/lib/auth-context';
 
 export default function RoleSelectScreen() {
@@ -25,9 +25,9 @@ export default function RoleSelectScreen() {
   // Auto-continue when returning from signup/login with a pre-selected role
   useEffect(() => {
     if (!isLoading && session && params.role && !hasContinued.current) {
-      if (params.role === 'owner' || params.role === 'walker') {
+      const role = parseUserRole(params.role);
+      if (role) {
         hasContinued.current = true;
-        const role: UserRole = params.role;
         setSelectedRole(role);
         switchRole(role);
       }

@@ -10,7 +10,7 @@ module.exports = defineConfig([
     ignores: ['dist/*'],
   },
   {
-    files: ['*.config.js', '*.config.cjs', '*.config.mjs'],
+    files: ['*.config.js', '*.config.cjs'],
     languageOptions: {
       sourceType: 'commonjs',
       globals: {

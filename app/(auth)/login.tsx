@@ -3,12 +3,13 @@ import { useLocalSearchParams, useRouter, Link } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, Text, TextInput, View } from 'react-native';
 import { supabase } from '@/lib/supabase';
+import { parseUserRole } from '@/lib/auth-context';
 import type { UserRole } from '@/lib/auth-context';
 
 export default function LoginScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ role?: string }>();
-  const role = (params.role ?? 'owner') as UserRole;
+  const role: UserRole = parseUserRole(params.role) ?? 'owner';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

@@ -6,6 +6,13 @@ import type { Session, User } from '@supabase/supabase-js';
 
 export type UserRole = 'owner' | 'walker';
 
+/** Safely parse a route param (string | string[] | undefined) into a UserRole. */
+export function parseUserRole(value: string | string[] | undefined): UserRole | null {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (raw === 'owner' || raw === 'walker') return raw;
+  return null;
+}
+
 export interface UserProfile {
   id: string;
   display_name: string | null;
@@ -59,6 +66,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const segments = useSegments();
 
+  function runProfileFetch(user: User) {
+    const requestId = ++profileRequestIdRef.current;
+    fetchProfile(user)
+      .then((p) => { if (profileRequestIdRef.current === requestId) setProfile(p); })
+      .catch(() => { if (profileRequestIdRef.current === requestId) setProfile(null); });
+  }
+
   function applySession(newSession: Session | null, prevUserId?: string | null) {
     const newUserId = newSession?.user.id ?? null;
     // Clear role state when identity changes (sign-out or different account)
@@ -68,12 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(null);
     }
     setSession(newSession);
-    const requestId = ++profileRequestIdRef.current;
-    if (newSession?.user) {
-      fetchProfile(newSession.user)
-        .then((p) => { if (profileRequestIdRef.current === requestId) setProfile(p); })
-        .catch(() => { if (profileRequestIdRef.current === requestId) setProfile(null); });
-    }
+    if (newSession?.user) runProfileFetch(newSession.user);
   }
 
   useEffect(() => {
