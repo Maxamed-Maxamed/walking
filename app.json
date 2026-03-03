@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "dogwalker",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
@@ -39,7 +38,11 @@
             "backgroundColor": "#172033"
           }
         }
-      ]
+      ],
+      "expo-asset",
+      "expo-font",
+      "expo-image",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
