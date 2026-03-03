@@ -7,6 +7,7 @@ module.exports = {
     extend: {
       colors: {
         canvas: '#F6F4EF',
+        warm: '#FFF8F0',
         surface: { DEFAULT: '#FFFDF8', dark: '#1E293B' },
         ink: '#172033',
         border: '#D7D3C9',

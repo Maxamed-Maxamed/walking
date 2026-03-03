@@ -16,15 +16,19 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
 
   async function handleSignup() {
-    if (!email || !password) {
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    const trimmedFullName = fullName.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
       Alert.alert('Error', 'Email and password are required.');
       return;
     }
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { display_name: fullName } },
+      email: trimmedEmail,
+      password: trimmedPassword,
+      options: { data: { display_name: trimmedFullName || null } },
     });
     setLoading(false);
     if (error) {

@@ -1,5 +1,5 @@
 import { useRouter, useSegments } from 'expo-router';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
 import type { Session, User } from '@supabase/supabase-js';
@@ -54,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [roles, setRoles] = useState<UserRole[]>([]);
   const [activeRole, setActiveRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const profileRequestIdRef = useRef(0);
 
   const router = useRouter();
   const segments = useSegments();
@@ -67,19 +68,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(null);
     }
     setSession(newSession);
+    const requestId = ++profileRequestIdRef.current;
     if (newSession?.user) {
-      fetchProfile(newSession.user).then(setProfile).catch(() => null);
+      fetchProfile(newSession.user)
+        .then((p) => { if (profileRequestIdRef.current === requestId) setProfile(p); })
+        .catch(() => { if (profileRequestIdRef.current === requestId) setProfile(null); });
     }
   }
 
   useEffect(() => {
     let currentUserId: string | null = null;
 
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      currentUserId = s?.user.id ?? null;
-      applySession(s, null);
-      setIsLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session: s } }) => {
+        currentUserId = s?.user.id ?? null;
+        applySession(s, null);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        applySession(null, null);
+        setIsLoading(false);
+      });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       applySession(s, currentUserId);

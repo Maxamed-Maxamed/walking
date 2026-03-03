@@ -18,10 +18,12 @@ export default function RoleSelectScreen() {
   // Auto-continue when returning from signup/login with a pre-selected role
   useEffect(() => {
     if (!isLoading && session && params.role && !hasContinued.current) {
-      hasContinued.current = true;
-      const role = params.role as UserRole;
-      setSelectedRole(role);
-      switchRole(role);
+      if (params.role === 'owner' || params.role === 'walker') {
+        hasContinued.current = true;
+        const role: UserRole = params.role;
+        setSelectedRole(role);
+        switchRole(role);
+      }
     }
   }, [isLoading, session, params.role, switchRole]);
 
@@ -40,7 +42,7 @@ export default function RoleSelectScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#FFF8F0]" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 bg-warm" edges={['top', 'bottom']}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerClassName="items-center px-6 py-8">
@@ -51,15 +53,15 @@ export default function RoleSelectScreen() {
           style={{ width: 120, height: 120 }}
           contentFit="contain"
         />
-        <Text className="mt-4 font-serif text-3xl font-semibold text-[#78350F]">
+        <Text className="mt-4 font-serif text-3xl font-semibold text-amber-900">
           DogWalker
         </Text>
         
         {/* Heading */}
-        <Text className="mt-10 text-center text-2xl font-bold text-[#78350F]">
+        <Text className="mt-10 text-center text-2xl font-bold text-amber-900">
           Who are you?
         </Text>
-        <Text className="mt-2 text-center text-base text-[#92400E]">
+        <Text className="mt-2 text-center text-base text-amber-800">
           Choose how you'll use DogWalker
         </Text>
 
@@ -87,6 +89,8 @@ export default function RoleSelectScreen() {
           <Pressable
             onPress={handleContinue}
             disabled={!selectedRole}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: !selectedRole }}
             className={`mt-10 w-full rounded-2xl py-4 ${
               selectedRole ? 'bg-amber-500' : 'bg-gray-300'
             }`}>
@@ -102,6 +106,8 @@ export default function RoleSelectScreen() {
             <Pressable
               onPress={handleCreateAccount}
               disabled={!selectedRole}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: !selectedRole }}
               className="w-full rounded-2xl bg-amber-500 py-4">
               <Text className="text-center text-lg font-bold text-white">
                 Create Account
@@ -110,6 +116,8 @@ export default function RoleSelectScreen() {
             <Pressable
               onPress={handleSignIn}
               disabled={!selectedRole}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: !selectedRole }}
               className="w-full rounded-2xl border-2 border-amber-500 py-4">
               <Text className="text-center text-lg font-bold text-amber-600">
                 Sign In
@@ -150,12 +158,15 @@ function RoleCard({
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
+        accessibilityRole="button"
+        accessibilityState={{ selected: isSelected }}
+        accessibilityLabel={`${title}: ${description}`}
         className={`w-full rounded-2xl border-2 bg-white p-6 ${
           isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200'
         }`}>
         <Text className="text-5xl">{emoji}</Text>
-        <Text className="mt-3 text-2xl font-bold text-[#78350F]">{title}</Text>
-        <Text className="mt-2 text-base leading-6 text-[#92400E]">{description}</Text>
+        <Text className="mt-3 text-2xl font-bold text-amber-900">{title}</Text>
+        <Text className="mt-2 text-base leading-6 text-amber-800">{description}</Text>
       </Pressable>
     </Animated.View>
   );

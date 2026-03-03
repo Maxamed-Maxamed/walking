@@ -38,6 +38,7 @@ export default function RootLayout() {
     ...Ionicons.font,
   });
   const [assetsLoaded, setAssetsLoaded] = useState(false);
+  const [splashTimedOut, setSplashTimedOut] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -55,7 +56,13 @@ export default function RootLayout() {
     };
   }, []);
 
-  const appReady = (fontsLoaded || !!fontError) && assetsLoaded;
+  // Fallback: never stay stuck on splash longer than 5 seconds
+  useEffect(() => {
+    const id = setTimeout(() => setSplashTimedOut(true), 5000);
+    return () => clearTimeout(id);
+  }, []);
+
+  const appReady = ((fontsLoaded || !!fontError) && assetsLoaded) || splashTimedOut;
 
   useEffect(() => {
     if (!appReady) return;
