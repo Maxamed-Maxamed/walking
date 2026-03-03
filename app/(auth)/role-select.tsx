@@ -15,6 +15,13 @@ export default function RoleSelectScreen() {
 
   const hasContinued = useRef(false);
 
+  // Reset guard on logout so re-login auto-continues correctly
+  useEffect(() => {
+    if (!session) {
+      hasContinued.current = false;
+    }
+  }, [session]);
+
   // Auto-continue when returning from signup/login with a pre-selected role
   useEffect(() => {
     if (!isLoading && session && params.role && !hasContinued.current) {

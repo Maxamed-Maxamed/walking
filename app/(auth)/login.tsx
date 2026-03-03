@@ -68,7 +68,7 @@ export default function LoginScreen() {
 
         <Pressable
           className="mt-2 w-full rounded-xl bg-primary py-4 disabled:opacity-50"
-          onPress={handleLogin}
+          onPress={() => { void handleLogin(); }}
           disabled={loading}
         >
           <Text className="text-center text-base font-semibold text-white">
