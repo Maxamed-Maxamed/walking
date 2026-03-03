@@ -1,34 +1,26 @@
-name: Claude PR Review
-on:
-  issue_comment:
-    types: [created]
-  pull_request:
-    types: [opened]
-
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  id-token: write
-
-jobs:
-  claude:
-    if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: anthropics/claude-code-action@73367208d0bc0c529b8b3fb223cbd4a8f63586e4 # beta
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          prompt: |
-            Review this pull request for the DogWalker Expo React Native app.
-            Focus on:
-            - TypeScript strict mode violations
-            - React Native / Expo SDK 55 best practices
-            - NativeWind v4 className usage (no StyleSheet.create unless necessary)
-            - Supabase RLS and auth security concerns
-            - TanStack Query patterns (query keys, staleTime, invalidation)
-            - async onPress handlers (must use void wrapper)
-            - Missing try/catch/finally on Supabase calls
-            Post inline review comments on specific lines where issues are found.
+- name: Claude Code Action Official
+  uses: anthropics/claude-code-action@v1
+  with:
+    # Required: Your Anthropic API key
+    anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+    
+    # The trigger phrase to look for in comments or issue body
+    trigger_phrase: "@claude"
+    
+    # The label that triggers the action
+    label_trigger: "claude"
+    
+    # Model to use
+    model: "claude-3-5-sonnet-20241022"
+    
+    # Maximum number of conversation turns
+    max_turns: 10
+    
+    # Timeout in minutes for execution
+    timeout_minutes: 30
+    
+    # Use just one comment to deliver issue/PR comments
+    use_sticky_comment: false
+    
+    # Enable commit signing
+    use_commit_signing: false
