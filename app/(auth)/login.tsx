@@ -24,13 +24,18 @@ export default function LoginScreen() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword });
-    setLoading(false);
-    if (error) {
-      Alert.alert('Login failed', error.message);
-    } else {
-      // Go back to role-select with the role pre-selected — auto-continue will fire
-      router.replace({ pathname: '/(auth)/role-select', params: { role } });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword });
+      if (error) {
+        Alert.alert('Login failed', error.message);
+      } else {
+        // Go back to role-select with the role pre-selected — auto-continue will fire
+        router.replace({ pathname: '/(auth)/role-select', params: { role } });
+      }
+    } catch {
+      Alert.alert('Login failed', 'An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   }
 

@@ -26,24 +26,29 @@ export default function SignupScreen() {
       return;
     }
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email: trimmedEmail,
-      password: trimmedPassword,
-      options: { data: { display_name: trimmedFullName || null } },
-    });
-    setLoading(false);
-    if (error) {
-      Alert.alert('Signup failed', error.message);
-    } else if (!data.session) {
-      // Email confirmation required
-      Alert.alert(
-        'Check your email',
-        'We sent a confirmation link. Confirm your email then sign in.',
-        [{ text: 'OK', onPress: () => router.replace({ pathname: '/(auth)/login', params: { role } }) }],
-      );
-    } else {
-      // Session immediately available — go back to role-select to auto-continue
-      router.replace({ pathname: '/(auth)/role-select', params: { role } });
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: trimmedEmail,
+        password: trimmedPassword,
+        options: { data: { display_name: trimmedFullName || null } },
+      });
+      if (error) {
+        Alert.alert('Signup failed', error.message);
+      } else if (!data.session) {
+        // Email confirmation required
+        Alert.alert(
+          'Check your email',
+          'We sent a confirmation link. Confirm your email then sign in.',
+          [{ text: 'OK', onPress: () => router.replace({ pathname: '/(auth)/login', params: { role } }) }],
+        );
+      } else {
+        // Session immediately available — go back to role-select to auto-continue
+        router.replace({ pathname: '/(auth)/role-select', params: { role } });
+      }
+    } catch {
+      Alert.alert('Signup failed', 'An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   }
 
