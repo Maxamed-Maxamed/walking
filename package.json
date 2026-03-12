@@ -11,6 +11,7 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@expo/ui": "~55.0.2",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-navigation/bottom-tabs": "^7.4.0",
@@ -21,10 +22,12 @@
     "clsx": "^2.1.1",
     "expo": "~55.0.5",
     "expo-asset": "~55.0.8",
+    "expo-camera": "~55.0.9",
     "expo-constants": "~55.0.7",
     "expo-font": "~55.0.4",
     "expo-haptics": "~55.0.8",
     "expo-image": "~55.0.6",
+    "expo-image-picker": "~55.0.12",
     "expo-linking": "~55.0.7",
     "expo-router": "~55.0.5",
     "expo-splash-screen": "~55.0.10",

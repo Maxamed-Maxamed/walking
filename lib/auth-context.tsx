@@ -1,10 +1,12 @@
 import { useRouter, useSegments } from 'expo-router';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/lib/supabase';
 
 import type { Session, User } from '@supabase/supabase-js';
 
 export type UserRole = 'owner' | 'walker';
+const ONBOARDING_COMPLETED_KEY = 'dogwalker:onboarding_completed';
 
 /** Safely parse a route param (string | string[] | undefined) into a UserRole. */
 export function parseUserRole(value: string | string[] | undefined): UserRole | null {
@@ -19,6 +21,7 @@ export interface UserProfile {
   avatar_url: string | null;
   bio: string | null;
   location: string | null;
+  onboarding_completed: boolean;
 }
 
 interface AuthContextType {
@@ -26,6 +29,8 @@ interface AuthContextType {
   profile: UserProfile | null;
   roles: UserRole[];
   activeRole: UserRole | null;
+  onboardingCompleted: boolean;
+  completeOnboarding: () => Promise<void>;
   switchRole: (role: UserRole) => void;
   isLoading: boolean;
 }
@@ -36,19 +41,23 @@ const AuthContext = createContext<AuthContextType | null>(null);
 function resolveRoute(
   session: Session | null,
   activeRole: UserRole | null,
+  onboardingCompleted: boolean,
   inAuthGroup: boolean,
+  inOnboardingGroup: boolean,
+  inOwnerGroup: boolean,
+  inWalkerGroup: boolean,
 ): string | null {
+  if (!onboardingCompleted) return inOnboardingGroup ? null : '/(onboarding)';
   if (!session) return inAuthGroup ? null : '/(auth)/role-select';
-  if (!inAuthGroup) return null;
-  if (activeRole === 'owner') return '/(owner)/(tabs)';
-  if (activeRole === 'walker') return '/(walker)/(tabs)/jobs';
-  return null;
+  if (activeRole === 'owner') return inOwnerGroup ? null : '/(owner)/(tabs)';
+  if (activeRole === 'walker') return inWalkerGroup ? null : '/(walker)/(tabs)/jobs';
+  return inAuthGroup ? null : '/(auth)/role-select';
 }
 
 async function fetchProfile(user: User): Promise<UserProfile | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, display_name, avatar_url, bio, location')
+    .select('id, display_name, avatar_url, bio, location, onboarding_completed')
     .eq('id', user.id)
     .single();
   if (error) return null;
@@ -60,11 +69,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [roles, setRoles] = useState<UserRole[]>([]);
   const [activeRole, setActiveRole] = useState<UserRole | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [onboardingCompleted, setOnboardingCompleted] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isOnboardingLoading, setIsOnboardingLoading] = useState(true);
   const profileRequestIdRef = useRef(0);
 
   const router = useRouter();
   const segments = useSegments();
+  const isLoading = isAuthLoading || isOnboardingLoading;
 
   function runProfileFetch(user: User) {
     const requestId = ++profileRequestIdRef.current;
@@ -86,6 +98,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
+    let active = true;
+
+    AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY)
+      .then((value) => {
+        if (!active) return;
+        setOnboardingCompleted(value === 'true');
+        setIsOnboardingLoading(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        setOnboardingCompleted(false);
+        setIsOnboardingLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
     let currentUserId: string | null = null;
 
     supabase.auth
@@ -93,17 +125,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .then(({ data: { session: s } }) => {
         currentUserId = s?.user.id ?? null;
         applySession(s, null);
-        setIsLoading(false);
+        setIsAuthLoading(false);
       })
       .catch(() => {
         applySession(null, null);
-        setIsLoading(false);
+        setIsAuthLoading(false);
       });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       applySession(s, currentUserId);
       currentUserId = s?.user.id ?? null;
-      setIsLoading(false);
+      setIsAuthLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -112,9 +144,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isLoading) return;
-    const route = resolveRoute(session, activeRole, segments[0] === '(auth)');
+    const topSegment = (segments[0] ?? '') as string;
+    const inAuthGroup = topSegment === '(auth)';
+    const inOnboardingGroup = topSegment === '(onboarding)';
+    const inOwnerGroup = topSegment === '(owner)';
+    const inWalkerGroup = topSegment === '(walker)';
+    const route = resolveRoute(
+      session,
+      activeRole,
+      onboardingCompleted,
+      inAuthGroup,
+      inOnboardingGroup,
+      inOwnerGroup,
+      inWalkerGroup,
+    );
     if (route) router.replace(route as Parameters<typeof router.replace>[0]);
-  }, [session, segments, isLoading, activeRole, router]);
+  }, [session, segments, isLoading, activeRole, onboardingCompleted, router]);
+
+  const completeOnboarding = useCallback(async () => {
+    await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, 'true');
+    setOnboardingCompleted(true);
+  }, []);
 
   const switchRole = useCallback((role: UserRole) => {
     setActiveRole(role);
@@ -122,7 +172,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, profile, roles, activeRole, switchRole, isLoading }}>
+    <AuthContext.Provider
+      value={{
+        session,
+        profile,
+        roles,
+        activeRole,
+        onboardingCompleted,
+        completeOnboarding,
+        switchRole,
+        isLoading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

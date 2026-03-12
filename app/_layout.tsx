@@ -30,7 +30,7 @@ SplashScreen.setOptions({
 SplashScreen.preventAutoHideAsync().catch(() => null);
 
 export const unstable_settings = {
-  anchor: '(auth)',
+  anchor: '(onboarding)',
 };
 
 export default function RootLayout() {
@@ -94,6 +94,7 @@ export default function RootLayout() {
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" />
+            <Stack.Screen name="(onboarding)" />
             <Stack.Screen name="(auth)" />
             <Stack.Screen name="(owner)" />
             <Stack.Screen name="(walker)" />

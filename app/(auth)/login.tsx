@@ -84,7 +84,7 @@ export default function LoginScreen() {
       </View>
 
       <Link href={{ pathname: '/(auth)/role-select', params: { role } }}>
-        <Text className="text-sm text-primary">Don't have an account? Get started</Text>
+        <Text className="text-sm text-primary">Don&apos;t have an account? Get started</Text>
       </Link>
     </View>
   );

@@ -69,7 +69,7 @@ export default function RoleSelectScreen() {
           Who are you?
         </Text>
         <Text className="mt-2 text-center text-base text-amber-800">
-          Choose how you'll use DogWalker
+          Choose how you&apos;ll use DogWalker
         </Text>
 
         {/* Role Cards */}
