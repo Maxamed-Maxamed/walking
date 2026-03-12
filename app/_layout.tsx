@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 import 'react-native-reanimated';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/lib/auth-context';
+import { SplashScreenView } from '@/components/splash-screen';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,7 +44,10 @@ export default function RootLayout() {
   useEffect(() => {
     let active = true;
 
-    Asset.loadAsync([require('@/assets/images/logo.png')])
+    Asset.loadAsync([
+      require('@/assets/images/logo.png'),
+      require('@/assets/images/paw-print.png'),
+    ])
       .catch(() => null)
       .finally(() => {
         if (active) {
@@ -81,7 +85,7 @@ export default function RootLayout() {
   }, [appReady]);
 
   if (!appReady) {
-    return null;
+    return <SplashScreenView />;
   }
 
   return (
