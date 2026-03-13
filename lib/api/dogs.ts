@@ -106,7 +106,7 @@ async function uploadDogPhoto(ownerId: string, asset: ImagePickerAsset): Promise
   const contentType = asset.mimeType ?? 'image/jpeg';
   const extension = getExtension(asset.fileName, asset.mimeType);
   const imageBuffer = await response.arrayBuffer();
-  const filePath = `${ownerId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
+  const filePath = `${ownerId}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
 
   const { error } = await supabase.storage.from(DOG_PHOTO_BUCKET).upload(filePath, imageBuffer, {
     contentType,
