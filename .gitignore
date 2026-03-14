@@ -48,3 +48,7 @@ app-example
 .github/copilot-instructions.md
 .env
 .kiro/settings/mcp.json
+
+
+#Ignore cursor AI rules
+.cursor\rules\codacy.mdc

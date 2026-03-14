@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import * as Crypto from 'expo-crypto';
 import type { ImagePickerAsset } from 'expo-image-picker';
 import { supabase } from '@/lib/supabase';
 
@@ -39,6 +40,9 @@ function getExtension(fileName: string | null | undefined, mimeType: string | nu
 }
 
 async function listDogs(ownerId: string): Promise<Dog[]> {
+  if (!ownerId?.trim()) {
+    throw new Error('Owner ID is required to list dogs.');
+  }
   const { data, error } = await supabase
     .from('dogs')
     .select(
@@ -106,7 +110,7 @@ async function uploadDogPhoto(ownerId: string, asset: ImagePickerAsset): Promise
   const contentType = asset.mimeType ?? 'image/jpeg';
   const extension = getExtension(asset.fileName, asset.mimeType);
   const imageBuffer = await response.arrayBuffer();
-  const filePath = `${ownerId}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
+  const filePath = `${ownerId}/${Date.now()}-${Crypto.randomUUID()}.${extension}`;
 
   const { error } = await supabase.storage.from(DOG_PHOTO_BUCKET).upload(filePath, imageBuffer, {
     contentType,

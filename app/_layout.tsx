@@ -62,8 +62,8 @@ export default function RootLayout() {
 
   // Fallback: never stay stuck on splash longer than 5 seconds
   useEffect(() => {
-    const id = setTimeout(() => setSplashTimedOut(true), 5000);
-    return () => clearTimeout(id);
+    const id = setTimeout(() => { setSplashTimedOut(true); }, 5000);
+    return () => { clearTimeout(id); }
   }, []);
 
   const appReady = ((fontsLoaded || !!fontError) && assetsLoaded) || splashTimedOut;

@@ -22,7 +22,7 @@ DogWalker is a two-sided marketplace mobile app connecting **Dog Owners** (who n
 
 | Layer        | Technology                                                                          |
 | ------------ | ----------------------------------------------------------------------------------- |
-| Framework    | Expo SDK 54+, React Native 0.81+, TypeScript (strict)                               |
+| Framework    | Expo SDK 55+, React Native 0.81+, TypeScript (strict)                               |
 | Routing      | **Expo Router** (file-based, typed routes enabled)                                  |
 | Server state | **TanStack Query (React Query)** for all Supabase data fetching, caching, mutations |
 | Client state | Minimal — colocate in components; use React Context only for auth/session           |

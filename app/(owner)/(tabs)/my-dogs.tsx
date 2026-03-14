@@ -488,8 +488,7 @@ export default function MyDogsScreen() {
                   <Text className="mb-1.5 text-sm font-medium text-slate-700">Dog Name *</Text>
                   <TextInput
                     value={formState.name}
-                    onChangeText={(value) => { setFormField('name', value); }} 
-                    
+                    onChangeText={(value) => { setFormField('name', value); }}
                     editable={!isSaving}
                     placeholder="e.g. Milo"
                     placeholderTextColor="#94A3B8"
@@ -501,7 +500,8 @@ export default function MyDogsScreen() {
                   <Text className="mb-1.5 text-sm font-medium text-slate-700">Breed</Text>
                   <TextInput
                     value={formState.breed}
-                    onChangeText={(value) => { setFormField('breed', value); }}                    editable={!isSaving}
+                    onChangeText={(value) => { setFormField('breed', value); }}
+                    editable={!isSaving}
                     placeholder="e.g. Golden Retriever"
                     placeholderTextColor="#94A3B8"
                     className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900"

@@ -75,6 +75,14 @@ export function OnboardingCarousel({
         scrollEnabled
         scrollEventThrottle={16}
         onScroll={handleScroll}
+        onScrollToIndexFailed={(info) => {
+          setTimeout(() => {
+            flatListRef.current?.scrollToIndex({
+              index: info.index,
+              animated: true,
+            });
+          }, 100);
+        }}
         showsHorizontalScrollIndicator={false}
       />
 
