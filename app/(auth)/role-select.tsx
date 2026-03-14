@@ -1,9 +1,11 @@
-import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Logo } from '@/components/ui/logo';
+import { Button } from '@/components/ui/button';
 import { useAuth, parseUserRole } from '@/lib/auth-context';
 import type { UserRole } from '@/lib/auth-context';
 
@@ -15,14 +17,12 @@ export default function RoleSelectScreen() {
 
   const hasContinued = useRef(false);
 
-  // Reset guard on logout so re-login auto-continues correctly
   useEffect(() => {
     if (!session) {
       hasContinued.current = false;
     }
   }, [session]);
 
-  // Auto-continue when returning from signup/login with a pre-selected role
   useEffect(() => {
     if (!isLoading && session && params.role && !hasContinued.current) {
       const role = parseUserRole(params.role);
@@ -53,83 +53,54 @@ export default function RoleSelectScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerClassName="items-center px-6 py-8">
-        
-        {/* Logo & Title */}
-        <Image
-          source={require('@/assets/images/logo.png')}
-          style={{ width: 120, height: 120 }}
-          contentFit="contain"
-        />
-        <Text className="mt-4 font-serif text-3xl font-semibold text-amber-900">
+        <Logo size={80} />
+        <Text className="mt-3 text-2xl font-bold text-ink font-display">
           DogWalker
         </Text>
-        
-        {/* Heading */}
-        <Text className="mt-10 text-center text-2xl font-bold text-amber-900">
+
+        <Text className="mt-10 text-center text-xl font-bold text-ink">
           Who are you?
         </Text>
-        <Text className="mt-2 text-center text-base text-amber-800">
-          Choose how you'll use DogWalker
-        </Text>
 
-        {/* Role Cards */}
-        <View className="mt-8 w-full gap-4">
+        <View className="mt-6 w-full gap-3">
           <RoleCard
-            emoji="🐾"
+            icon="paw"
             title="Dog Owner"
             description="Find trusted walkers for your furry friend"
             isSelected={selectedRole === 'owner'}
-            onPress={() => { setSelectedRole('owner'); }}
+            onPress={() => setSelectedRole('owner')}
           />
           <RoleCard
-            emoji="🦮"
+            icon="walk"
             title="Dog Walker"
             description="Earn money walking dogs in your neighborhood"
             isSelected={selectedRole === 'walker'}
-            onPress={() => { setSelectedRole('walker'); }}
+            onPress={() => setSelectedRole('walker')}
           />
         </View>
 
-        {/* CTA buttons — vary based on auth state */}
         {session ? (
-          // Authenticated: just continue with selected role
-          <Pressable
+          <Button
             onPress={handleContinue}
             disabled={!selectedRole}
-            accessibilityRole="button"
-            accessibilityState={{ disabled: !selectedRole }}
-            className={`mt-10 w-full rounded-2xl py-4 ${
-              selectedRole ? 'bg-amber-500' : 'bg-gray-300'
-            }`}>
-            <Text className={`text-center text-lg font-bold ${
-              selectedRole ? 'text-white' : 'text-gray-500'
-            }`}>
-              Continue
-            </Text>
-          </Pressable>
+            className="mt-8 w-full"
+          >
+            Continue
+          </Button>
         ) : (
-          // Unauthenticated: show signup + login options
-          <View className={`mt-10 w-full gap-3 transition-opacity ${selectedRole ? 'opacity-100' : 'opacity-40'}`}>
-            <Pressable
-              onPress={handleCreateAccount}
-              disabled={!selectedRole}
-              accessibilityRole="button"
-              accessibilityState={{ disabled: !selectedRole }}
-              className="w-full rounded-2xl bg-amber-500 py-4">
-              <Text className="text-center text-lg font-bold text-white">
-                Create Account
-              </Text>
-            </Pressable>
-            <Pressable
+          <View
+            className={`mt-8 w-full gap-3 ${selectedRole ? 'opacity-100' : 'opacity-40'}`}>
+            <Button onPress={handleCreateAccount} disabled={!selectedRole} className="w-full">
+              Create Account
+            </Button>
+            <Button
+              variant="outline"
               onPress={handleSignIn}
               disabled={!selectedRole}
-              accessibilityRole="button"
-              accessibilityState={{ disabled: !selectedRole }}
-              className="w-full rounded-2xl border-2 border-amber-500 py-4">
-              <Text className="text-center text-lg font-bold text-amber-600">
-                Sign In
-              </Text>
-            </Pressable>
+              className="w-full"
+            >
+              Sign In
+            </Button>
           </View>
         )}
       </ScrollView>
@@ -138,13 +109,13 @@ export default function RoleSelectScreen() {
 }
 
 function RoleCard({
-  emoji,
+  icon,
   title,
   description,
   isSelected,
   onPress,
 }: {
-  emoji: string;
+  icon: 'paw' | 'walk';
   title: string;
   description: string;
   isSelected: boolean;
@@ -156,8 +127,12 @@ function RoleCard({
     transform: [{ scale: scale.value }],
   }));
 
-  const handlePressIn = () => { scale.value = withSpring(0.97); };
-  const handlePressOut = () => { scale.value = withSpring(1); };
+  const handlePressIn = () => {
+    scale.value = withSpring(0.97);
+  };
+  const handlePressOut = () => {
+    scale.value = withSpring(1);
+  };
 
   return (
     <Animated.View style={animatedStyle}>
@@ -168,12 +143,22 @@ function RoleCard({
         accessibilityRole="button"
         accessibilityState={{ selected: isSelected }}
         accessibilityLabel={`${title}: ${description}`}
-        className={`w-full rounded-2xl border-2 bg-white p-6 ${
-          isSelected ? 'border-amber-500 bg-amber-50' : 'border-gray-200'
+        className={`w-full rounded-2xl border-2 p-5 ${
+          isSelected ? 'border-primary bg-primary-light' : 'border-border bg-surface'
         }`}>
-        <Text className="text-5xl">{emoji}</Text>
-        <Text className="mt-3 text-2xl font-bold text-amber-900">{title}</Text>
-        <Text className="mt-2 text-base leading-6 text-amber-800">{description}</Text>
+        <View className="flex-row items-center gap-4">
+          <View className="h-12 w-12 rounded-full bg-primary-light items-center justify-center">
+            <Ionicons
+              name={icon}
+              size={24}
+              color="#4F46E5"
+            />
+          </View>
+          <View className="flex-1">
+            <Text className="text-lg font-bold text-ink">{title}</Text>
+            <Text className="mt-0.5 text-sm text-muted">{description}</Text>
+          </View>
+        </View>
       </Pressable>
     </Animated.View>
   );

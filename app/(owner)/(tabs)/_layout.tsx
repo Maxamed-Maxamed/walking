@@ -6,7 +6,7 @@ export default function OwnerTabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#4F46E5',
+        tabBarActiveTintColor: '#4F46E5', // primary
         tabBarInactiveTintColor: '#94A3B8',
         tabBarStyle: { borderTopColor: '#F1F5F9' },
       }}>
@@ -49,6 +49,8 @@ export default function OwnerTabLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
         }}
       />
+
+      
     </Tabs>
   );
 }

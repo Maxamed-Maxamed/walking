@@ -7,10 +7,11 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect,  useState } from 'react';
 import 'react-native-reanimated';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/lib/auth-context';
+import { SplashScreenView } from '@/components/splash-screen';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,21 +30,28 @@ SplashScreen.setOptions({
 SplashScreen.preventAutoHideAsync().catch(() => null);
 
 export const unstable_settings = {
-  anchor: '(auth)',
+  anchor: '(onboarding)',
 };
 
+const MINIMUM_SPLASH_MS = 2500;
+
 export default function RootLayout() {
-  const splashStartedAt = useRef(Date.now());
+  // const splashStartedAt = useRef(Date.now());
   const [fontsLoaded, fontError] = useFonts({
     ...Ionicons.font,
   });
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const [splashTimedOut, setSplashTimedOut] = useState(false);
+  const [minimumElapsed, setMinimumElapsed] = useState(false);
+  
 
   useEffect(() => {
     let active = true;
 
-    Asset.loadAsync([require('@/assets/images/logo.png')])
+    Asset.loadAsync([
+      require('@/assets/images/logo.png'),
+      require('@/assets/images/paw-print.png'),
+    ])
       .catch(() => null)
       .finally(() => {
         if (active) {
@@ -56,32 +64,33 @@ export default function RootLayout() {
     };
   }, []);
 
-  // Fallback: never stay stuck on splash longer than 5 seconds
+  // Ensure branded splash is visible for at least MINIMUM_SPLASH_MS
   useEffect(() => {
-    const id = setTimeout(() => setSplashTimedOut(true), 5000);
+    const id = setTimeout(() => {
+      setMinimumElapsed(true);
+    }, MINIMUM_SPLASH_MS);
     return () => clearTimeout(id);
   }, []);
 
-  const appReady = ((fontsLoaded || !!fontError) && assetsLoaded) || splashTimedOut;
+  // Fallback: never stay stuck on splash longer than 5 seconds
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setSplashTimedOut(true);
+    }, 5000);
+    return () => clearTimeout(id);
+  }, []);
+
+  const resourcesReady = ((fontsLoaded || !!fontError) && assetsLoaded) || splashTimedOut;
+  const showSplash = !(resourcesReady && minimumElapsed);
 
   useEffect(() => {
-    if (!appReady) return;
-
-    const minimumSplashMs = 900;
-    const elapsed = Date.now() - splashStartedAt.current;
-    const remaining = Math.max(0, minimumSplashMs - elapsed);
-
-    const timer = setTimeout(() => {
+    if (!showSplash) {
       SplashScreen.hideAsync().catch(() => null);
-    }, remaining);
+    }
+  }, [showSplash]);
 
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [appReady]);
-
-  if (!appReady) {
-    return null;
+  if (showSplash) {
+    return <SplashScreenView />;
   }
 
   return (
@@ -90,6 +99,7 @@ export default function RootLayout() {
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" />
+            <Stack.Screen name="(onboarding)" />
             <Stack.Screen name="(auth)" />
             <Stack.Screen name="(owner)" />
             <Stack.Screen name="(walker)" />
