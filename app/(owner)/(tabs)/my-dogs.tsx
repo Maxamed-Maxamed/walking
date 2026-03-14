@@ -269,6 +269,10 @@ export default function MyDogsScreen() {
     try {
       setIsCapturingPhoto(true);
       const captured = await cameraRef.current.takePictureAsync({ quality: 0.8 });
+      if (!captured) {
+        Alert.alert('Camera capture failed', 'No photo was captured. Please try again.');
+        return;
+      }
       const capturedAsset = mapCapturedPhotoToAsset(captured);
       setSelectedPhotoAsset(capturedAsset);
       setFormField('photoUrl', capturedAsset.uri);

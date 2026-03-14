@@ -7,6 +7,11 @@ import type { Session, User } from '@supabase/supabase-js';
 
 export type UserRole = 'owner' | 'walker';
 const ONBOARDING_COMPLETED_KEY = 'dogwalker:onboarding_completed';
+const ACTIVE_ROLE_STORAGE_KEY_PREFIX = 'dogwalker:active_role:';
+
+function getActiveRoleStorageKey(userId: string): string {
+  return `${ACTIVE_ROLE_STORAGE_KEY_PREFIX}${userId}`;
+}
 
 /** Safely parse a route param (string | string[] | undefined) into a UserRole. */
 export function parseUserRole(value: string | string[] | undefined): UserRole | null {
@@ -72,11 +77,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [onboardingCompleted, setOnboardingCompleted] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isOnboardingLoading, setIsOnboardingLoading] = useState(true);
+  const [isRoleLoading, setIsRoleLoading] = useState(true);
   const profileRequestIdRef = useRef(0);
 
   const router = useRouter();
   const segments = useSegments();
-  const isLoading = isAuthLoading || isOnboardingLoading;
+  const isLoading = isAuthLoading || isOnboardingLoading || isRoleLoading;
 
   function runProfileFetch(user: User) {
     const requestId = ++profileRequestIdRef.current;
@@ -92,6 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setRoles([]);
       setActiveRole(null);
       setProfile(null);
+      setIsRoleLoading(Boolean(newUserId));
     }
     setSession(newSession);
     if (newSession?.user) runProfileFetch(newSession.user);
@@ -143,6 +150,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    const userId = session?.user.id;
+    if (!userId) {
+      setIsRoleLoading(false);
+      return;
+    }
+
+    if (activeRole) {
+      setIsRoleLoading(false);
+      return;
+    }
+
+    let active = true;
+    setIsRoleLoading(true);
+
+    AsyncStorage.getItem(getActiveRoleStorageKey(userId))
+      .then((storedRoleValue) => {
+        if (!active) return;
+        const storedRole = parseUserRole(storedRoleValue ?? undefined);
+        if (storedRole) {
+          setActiveRole(storedRole);
+          setRoles((prev) => (prev.includes(storedRole) ? prev : [...prev, storedRole]));
+        }
+        setIsRoleLoading(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        setIsRoleLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [session?.user.id, activeRole]);
+
+  useEffect(() => {
     if (isLoading) return;
     const topSegment = (segments[0] ?? '') as string;
     const inAuthGroup = topSegment === '(auth)';
@@ -169,7 +211,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const switchRole = useCallback((role: UserRole) => {
     setActiveRole(role);
     setRoles((prev) => (prev.includes(role) ? prev : [...prev, role]));
-  }, []);
+
+    const userId = session?.user.id;
+    if (!userId) return;
+
+    AsyncStorage.setItem(getActiveRoleStorageKey(userId), role).catch(() => {
+      // Keep in-memory role switch responsive even if persistence fails.
+    });
+  }, [session?.user.id]);
 
   return (
     <AuthContext.Provider
