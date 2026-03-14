@@ -1,29 +1,15 @@
 import React from 'react';
-import { Alert, View, Image } from 'react-native';
+import { Alert, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth-context';
-import { OnboardingCarousel } from './onboarding-carousel';
+import { OnboardingCarousel } from '@/components/onboarding/onboarding-carousel';
 
-// Icons from Icons8
-const DOG_PAW_ICON = 'https://img.icons8.com/?id=9201&format=png&size=128';
-const PERSON_ICON = 'https://img.icons8.com/?id=60391&format=png&size=128';
-const WALKING_ICON = 'https://img.icons8.com/?id=2244&format=png&size=128';
-const TRUST_ICON = 'https://img.icons8.com/?id=24761&format=png&size=128';
-const CHECKMARK_ICON = 'https://img.icons8.com/?id=11695&format=png&size=128';
-
-function IconContainer({
-  source,
-  backgroundColor,
-}: {
-  source: string;
-  backgroundColor: string;
-}) {
+function IconContainer({ name }: { name: keyof typeof Ionicons.glyphMap }) {
   return (
-    <View
-      className={`w-24 h-24 ${backgroundColor} rounded-full justify-center items-center mb-8`}
-    >
-      <Image source={{ uri: source }} className="w-16 h-16" resizeMode="contain" />
+    <View className="w-24 h-24 rounded-full bg-primary-light justify-center items-center mb-8">
+      <Ionicons name={name} size={48} color="#4F46E5" />
     </View>
   );
 }
@@ -32,37 +18,20 @@ const slides = [
   {
     id: '1',
     title: 'Welcome to DogWalker',
-    description:
-      'Connect dog owners with trusted walkers. Find the perfect walk for your furry friend.',
-    icon: <IconContainer source={DOG_PAW_ICON} backgroundColor="bg-indigo-100" />,
+    description: 'Connect dog owners with trusted walkers in your area.',
+    icon: <IconContainer name="paw" />,
   },
   {
     id: '2',
     title: 'For Dog Owners',
-    description:
-      'Browse verified walkers, book walks with ease, and keep your dogs active and happy.',
-    icon: <IconContainer source={PERSON_ICON} backgroundColor="bg-emerald-100" />,
+    description: 'Browse walkers, book walks, and keep your dogs happy.',
+    icon: <IconContainer name="person" />,
   },
   {
     id: '3',
     title: 'For Dog Walkers',
-    description:
-      'Earn money doing what you love. Help dogs stay fit and healthy on every walk.',
-    icon: <IconContainer source={WALKING_ICON} backgroundColor="bg-blue-100" />,
-  },
-  {
-    id: '4',
-    title: 'Safety & Trust',
-    description:
-      'All walkers are verified. Ratings and reviews ensure the best care for your dog.',
-    icon: <IconContainer source={TRUST_ICON} backgroundColor="bg-amber-100" />,
-  },
-  {
-    id: '5',
-    title: 'Ready to Get Started?',
-    description:
-      'Join thousands of happy dog owners and walkers. Tap "Get Started" to begin.',
-    icon: <IconContainer source={CHECKMARK_ICON} backgroundColor="bg-indigo-100" />,
+    description: 'Earn money doing what you love. Get started today.',
+    icon: <IconContainer name="walk" />,
   },
 ];
 
@@ -104,7 +73,7 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-background">
       <OnboardingCarousel
         slides={slides}
         onComplete={handleComplete}

@@ -1,10 +1,11 @@
-import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter, Link } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, Text, TextInput, View } from 'react-native';
+import { Alert, Text, TextInput } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { parseUserRole } from '@/lib/auth-context';
 import type { UserRole } from '@/lib/auth-context';
+import { AuthScreenLayout } from '@/components/auth/auth-screen-layout';
+import { Button } from '@/components/ui/button';
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -35,14 +36,18 @@ export default function SignupScreen() {
       if (error) {
         Alert.alert('Signup failed', error.message);
       } else if (!data.session) {
-        // Email confirmation required
         Alert.alert(
           'Check your email',
           'We sent a confirmation link. Confirm your email then sign in.',
-          [{ text: 'OK', onPress: () => router.replace({ pathname: '/(auth)/login', params: { role } }) }],
+          [
+            {
+              text: 'OK',
+              onPress: () =>
+                router.replace({ pathname: '/(auth)/login', params: { role } }),
+            },
+          ],
         );
       } else {
-        // Session immediately available — go back to role-select to auto-continue
         router.replace({ pathname: '/(auth)/role-select', params: { role } });
       }
     } catch {
@@ -52,64 +57,58 @@ export default function SignupScreen() {
     }
   }
 
+  const subtitle =
+    role === 'owner'
+      ? 'Sign up as a Dog Owner'
+      : 'Sign up as a Dog Walker';
+
   return (
-    <View className="flex-1 items-center justify-center gap-4 bg-white px-6">
-      <Image
-        source={require('@/assets/images/logo.png')}
-        style={{ width: 96, height: 96 }}
-        contentFit="contain"
-      />
-      <Text className="text-2xl font-bold text-gray-900">DogWalker</Text>
-      <Text className="text-base text-muted">
-        {role === 'owner' ? 'Sign up as a Dog Owner' : 'Sign up as a Dog Walker'}
-      </Text>
-
-      <View className="w-full gap-3 pt-4">
-        <TextInput
-          className="w-full rounded-xl border border-gray-200 bg-surface px-4 py-3 text-gray-900"
-          placeholder="Full Name"
-          placeholderTextColor="#94A3B8"
-          value={fullName}
-          onChangeText={setFullName}
-          autoCapitalize="words"
-          editable={!loading}
-        />
-        <TextInput
-          className="w-full rounded-xl border border-gray-200 bg-surface px-4 py-3 text-gray-900"
-          placeholder="Email"
-          placeholderTextColor="#94A3B8"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoComplete="email"
-          editable={!loading}
-        />
-        <TextInput
-          className="w-full rounded-xl border border-gray-200 bg-surface px-4 py-3 text-gray-900"
-          placeholder="Password"
-          placeholderTextColor="#94A3B8"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          autoComplete="new-password"
-          editable={!loading}
-        />
-
-        <Pressable
-          className="mt-2 w-full rounded-xl bg-primary py-4 disabled:opacity-50"
-          onPress={() => { void handleSignup(); }}
-          disabled={loading}
-        >
-          <Text className="text-center text-base font-semibold text-white">
-            {loading ? 'Creating account…' : 'Create Account'}
+    <AuthScreenLayout
+      title="DogWalker"
+      subtitle={subtitle}
+      footer={
+        <Link href={{ pathname: '/(auth)/login', params: { role } }}>
+          <Text className="text-sm text-primary">
+            Already have an account? Sign in
           </Text>
-        </Pressable>
-      </View>
-
-      <Link href={{ pathname: '/(auth)/login', params: { role } }}>
-        <Text className="text-sm text-primary">Already have an account? Sign in</Text>
-      </Link>
-    </View>
+        </Link>
+      }>
+      <TextInput
+        className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-ink"
+        placeholder="Full Name"
+        placeholderTextColor="#94A3B8"
+        value={fullName}
+        onChangeText={setFullName}
+        autoCapitalize="words"
+        editable={!loading}
+      />
+      <TextInput
+        className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-ink"
+        placeholder="Email"
+        placeholderTextColor="#94A3B8"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoComplete="email"
+        editable={!loading}
+      />
+      <TextInput
+        className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-ink"
+        placeholder="Password"
+        placeholderTextColor="#94A3B8"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        autoComplete="new-password"
+        editable={!loading}
+      />
+      <Button
+        onPress={() => void handleSignup()}
+        disabled={loading}
+        className="mt-2 w-full">
+        {loading ? 'Creating account…' : 'Create Account'}
+      </Button>
+    </AuthScreenLayout>
   );
 }

@@ -8,6 +8,7 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 interface OnboardingSlide {
   id: string;
@@ -34,8 +35,8 @@ export function OnboardingCarousel({
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
-    const currentIndex = Math.round(contentOffsetX / width);
-    setCurrentIndex(currentIndex);
+    const index = Math.round(contentOffsetX / width);
+    setCurrentIndex(index);
   };
 
   const handleNext = () => {
@@ -50,13 +51,13 @@ export function OnboardingCarousel({
   };
 
   const renderSlide = ({ item }: { item: OnboardingSlide }) => (
-    <View className="flex-1 w-full justify-center items-center bg-white px-6 py-12">
-      <View className="flex-1 justify-center items-center">{item.icon}</View>
-      <View className="flex-1 justify-center w-full">
-        <Text className="text-3xl font-bold text-center text-gray-900 mb-4">
+    <View className="flex-1 w-full justify-center items-center bg-background px-8 py-16">
+      <View className="flex-[0.6] justify-center items-center">{item.icon}</View>
+      <View className="flex-[0.4] justify-center w-full">
+        <Text className="text-2xl font-bold text-center text-ink mb-3">
           {item.title}
         </Text>
-        <Text className="text-lg text-center text-gray-600 leading-6">
+        <Text className="text-base text-center text-muted leading-6">
           {item.description}
         </Text>
       </View>
@@ -64,7 +65,16 @@ export function OnboardingCarousel({
   );
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-background">
+      <TouchableOpacity
+        onPress={onSkip}
+        className="absolute top-12 right-6 z-10 p-2"
+        activeOpacity={0.7}
+        accessibilityLabel="Skip"
+      >
+        <Ionicons name="close" size={24} color="#94A3B8" />
+      </TouchableOpacity>
+
       <FlatList
         ref={flatListRef}
         data={slides}
@@ -86,29 +96,21 @@ export function OnboardingCarousel({
         showsHorizontalScrollIndicator={false}
       />
 
-      {/* Indicators */}
       <View className="flex-row justify-center items-center py-4 gap-2">
         {slides.map((_, index) => (
           <View
             key={index}
-            className={`h-2 rounded-full transition-all ${
-              index === currentIndex
-                ? 'w-8 bg-indigo-600'
-                : 'w-2 bg-gray-300'
+            className={`h-2 rounded-full ${
+              index === currentIndex ? 'w-8 bg-primary' : 'w-2 bg-border'
             }`}
           />
         ))}
       </View>
 
-      {/* Action Buttons */}
-      <View className="flex-row justify-between items-center px-6 pb-8">
-        <TouchableOpacity onPress={onSkip} activeOpacity={0.7}>
-          <Text className="text-base font-semibold text-gray-600">Skip</Text>
-        </TouchableOpacity>
-
+      <View className="px-6 pb-10">
         <TouchableOpacity
           onPress={handleNext}
-          className="bg-indigo-600 px-8 py-3 rounded-lg"
+          className="bg-primary rounded-xl py-4 items-center"
           activeOpacity={0.8}
         >
           <Text className="text-white text-base font-semibold">

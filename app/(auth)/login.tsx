@@ -1,10 +1,11 @@
-import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter, Link } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, Text, TextInput, View } from 'react-native';
+import { Alert, Text, TextInput } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { parseUserRole } from '@/lib/auth-context';
 import type { UserRole } from '@/lib/auth-context';
+import { AuthScreenLayout } from '@/components/auth/auth-screen-layout';
+import { Button } from '@/components/ui/button';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -25,11 +26,13 @@ export default function LoginScreen() {
     }
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword });
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword,
+      });
       if (error) {
         Alert.alert('Login failed', error.message);
       } else {
-        // Go back to role-select with the role pre-selected — auto-continue will fire
         router.replace({ pathname: '/(auth)/role-select', params: { role } });
       }
     } catch {
@@ -40,52 +43,43 @@ export default function LoginScreen() {
   }
 
   return (
-    <View className="flex-1 items-center justify-center gap-4 bg-white px-6">
-      <Image
-        source={require('@/assets/images/logo.png')}
-        style={{ width: 96, height: 96 }}
-        contentFit="contain"
-      />
-      <Text className="text-2xl font-bold text-gray-900">DogWalker</Text>
-      <Text className="text-base text-muted">Sign in to your account</Text>
-
-      <View className="w-full gap-3 pt-4">
-        <TextInput
-          className="w-full rounded-xl border border-gray-200 bg-surface px-4 py-3 text-gray-900"
-          placeholder="Email"
-          placeholderTextColor="#94A3B8"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoComplete="email"
-          editable={!loading}
-        />
-        <TextInput
-          className="w-full rounded-xl border border-gray-200 bg-surface px-4 py-3 text-gray-900"
-          placeholder="Password"
-          placeholderTextColor="#94A3B8"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          autoComplete="current-password"
-          editable={!loading}
-        />
-
-        <Pressable
-          className="mt-2 w-full rounded-xl bg-primary py-4 disabled:opacity-50"
-          onPress={() => { void handleLogin(); }}
-          disabled={loading}
-        >
-          <Text className="text-center text-base font-semibold text-white">
-            {loading ? 'Signing in…' : 'Sign In'}
+    <AuthScreenLayout
+      title="DogWalker"
+      subtitle="Sign in to your account"
+      footer={
+        <Link href={{ pathname: '/(auth)/role-select', params: { role } }}>
+          <Text className="text-sm text-primary">
+            Don&apos;t have an account? Get started
           </Text>
-        </Pressable>
-      </View>
-
-      <Link href={{ pathname: '/(auth)/role-select', params: { role } }}>
-        <Text className="text-sm text-primary">Don&apos;t have an account? Get started</Text>
-      </Link>
-    </View>
+        </Link>
+      }>
+      <TextInput
+        className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-ink"
+        placeholder="Email"
+        placeholderTextColor="#94A3B8"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoComplete="email"
+        editable={!loading}
+      />
+      <TextInput
+        className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-ink"
+        placeholder="Password"
+        placeholderTextColor="#94A3B8"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        autoComplete="current-password"
+        editable={!loading}
+      />
+      <Button
+        onPress={() => void handleLogin()}
+        disabled={loading}
+        className="mt-2 w-full">
+        {loading ? 'Signing in…' : 'Sign In'}
+      </Button>
+    </AuthScreenLayout>
   );
 }
