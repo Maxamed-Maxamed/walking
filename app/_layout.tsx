@@ -1,17 +1,17 @@
 import '@/global.css';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SplashScreenView } from '@/components/splash-screen';
+import { AuthProvider } from '@/lib/auth-context';
 import { Ionicons } from '@expo/vector-icons';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Asset } from 'expo-asset';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect,  useState } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
-import { AuthProvider } from '@/lib/auth-context';
-import { SplashScreenView } from '@/components/splash-screen';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,7 +33,7 @@ export const unstable_settings = {
   anchor: '(onboarding)',
 };
 
-const MINIMUM_SPLASH_MS = 2500;
+const MINIMUM_SPLASH_MS = 5000;
 
 export default function RootLayout() {
   // const splashStartedAt = useRef(Date.now());
@@ -72,11 +72,11 @@ export default function RootLayout() {
     return () => clearTimeout(id);
   }, []);
 
-  // Fallback: never stay stuck on splash longer than 5 seconds
+  // Fallback: never stay stuck on splash longer than 7 seconds
   useEffect(() => {
     const id = setTimeout(() => {
       setSplashTimedOut(true);
-    }, 5000);
+    }, 7000);
     return () => clearTimeout(id);
   }, []);
 

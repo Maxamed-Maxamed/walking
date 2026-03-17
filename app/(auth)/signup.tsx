@@ -1,14 +1,15 @@
-import { useLocalSearchParams, useRouter, Link } from 'expo-router';
-import { useState } from 'react';
-import { Alert, Text, TextInput } from 'react-native';
-import { supabase } from '@/lib/supabase';
-import { parseUserRole } from '@/lib/auth-context';
-import type { UserRole } from '@/lib/auth-context';
 import { AuthScreenLayout } from '@/components/auth/auth-screen-layout';
 import { Button } from '@/components/ui/button';
+import type { UserRole } from '@/lib/auth-context';
+import { parseUserRole } from '@/lib/auth-context';
+import { supabase } from '@/lib/supabase';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Alert, Text, TextInput } from 'react-native';
 
 export default function SignupScreen() {
   const router = useRouter();
+  const { switchRole } = useAuth();
   const params = useLocalSearchParams<{ role?: string }>();
   const role: UserRole = parseUserRole(params.role) ?? 'owner';
 
@@ -48,7 +49,8 @@ export default function SignupScreen() {
           ],
         );
       } else {
-        router.replace({ pathname: '/(auth)/role-select', params: { role } });
+        // Successfully signed up with session - set active role and let auth context navigate
+        switchRole(role);
       }
     } catch {
       Alert.alert('Signup failed', 'An unexpected error occurred. Please try again.');
