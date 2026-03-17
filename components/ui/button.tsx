@@ -38,6 +38,22 @@ const variantStyles: Record<ButtonVariant, { container: string; text: string }> 
   },
 };
 
+function getVariantStyles(variant: ButtonVariant): { container: string; text: string } {
+  switch (variant) {
+    case 'secondary':
+      return variantStyles.secondary;
+    case 'outline':
+      return variantStyles.outline;
+    case 'ghost':
+      return variantStyles.ghost;
+    case 'destructive':
+      return variantStyles.destructive;
+    case 'primary':
+    default:
+      return variantStyles.primary;
+  }
+}
+
 export function Button({
   variant = 'primary',
   className,
@@ -46,7 +62,7 @@ export function Button({
   disabled,
   ...props
 }: ButtonProps) {
-  const styles = variantStyles[variant];
+  const styles = getVariantStyles(variant);
   return (
     <Pressable
       className={cn(styles.container, 'items-center justify-center', className)}

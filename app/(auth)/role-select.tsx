@@ -68,14 +68,18 @@ export default function RoleSelectScreen() {
             title="Dog Owner"
             description="Find trusted walkers for your furry friend"
             isSelected={selectedRole === 'owner'}
-            onPress={() => setSelectedRole('owner')}
+            onPress={() => {
+              setSelectedRole('owner');
+            }}
           />
           <RoleCard
             icon="walk"
             title="Dog Walker"
             description="Earn money walking dogs in your neighborhood"
             isSelected={selectedRole === 'walker'}
-            onPress={() => setSelectedRole('walker')}
+            onPress={() => {
+              setSelectedRole('walker');
+            }}
           />
         </View>
 
