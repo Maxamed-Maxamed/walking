@@ -1,12 +1,11 @@
-import { useEffect } from 'react';
-import { useRouter } from 'expo-router';
+import { Text, View } from 'react-native';
 
-export default function IndexScreen() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace('/(onboarding)' as Parameters<typeof router.replace>[0]);
-  }, [router]);
-
-  return null;
+export default function Index() {
+  return (
+    <View className="flex-1 items-center justify-center bg-background">
+      <Text className="text-2xl font-bold text-ink">
+        Welcome to DogWalker!
+      </Text>
+    </View>
+  );
 }

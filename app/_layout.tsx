@@ -1,7 +1,7 @@
 import '@/global.css';
 
-import { SplashScreenView } from '@/components/splash-screen';
-import { AuthProvider } from '@/lib/auth-context';
+import { SplashScreenView } from '../components/splash-screen';
+import { AuthProvider } from '../lib/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Asset } from 'expo-asset';
@@ -22,7 +22,6 @@ const queryClient = new QueryClient({
   },
 });
 
-
 SplashScreen.setOptions({
   duration: 450,
   fade: true,
@@ -36,21 +35,19 @@ export const unstable_settings = {
 const MINIMUM_SPLASH_MS = 5000;
 
 export default function RootLayout() {
-  // const splashStartedAt = useRef(Date.now());
   const [fontsLoaded, fontError] = useFonts({
     ...Ionicons.font,
   });
   const [assetsLoaded, setAssetsLoaded] = useState(false);
   const [splashTimedOut, setSplashTimedOut] = useState(false);
   const [minimumElapsed, setMinimumElapsed] = useState(false);
-  
 
   useEffect(() => {
     let active = true;
 
     Asset.loadAsync([
-      require('@/assets/images/logo.png'),
-      require('@/assets/images/paw-print.png'),
+      require('../assets/images/logo.png'),
+      require('../assets/images/paw-print.png'),
     ])
       .catch(() => null)
       .finally(() => {
