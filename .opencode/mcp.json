@@ -76,6 +76,13 @@
       "autoStart": true
     },
 
+    "miro": {
+      "type": "http",
+      "url": "https://mcp.miro.com/",
+      "gallery": "https://api.mcp.github.com",
+      "version": "1.0.2"
+    },
+
     "codacy/codacy-mcp-server": {
       "type": "stdio",
       "autoStart": true,
