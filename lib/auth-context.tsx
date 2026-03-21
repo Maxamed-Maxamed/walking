@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     activeRole: null,
     onboardingCompleted: false,
     completeOnboarding: async () => {},
-    switchRole: () => {},
+    switchRole: (role: string) => void 0,
     isLoading: false,
   };
 
@@ -40,3 +40,8 @@ export function useAuth() {
   }
   return context;
 }
+
+// Export types and helper functions
+export type { Session } from '@supabase/supabase-js';
+export type { UserRole } from './auth-types';
+export { parseUserRole } from './auth-types';
