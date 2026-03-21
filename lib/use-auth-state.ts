@@ -1,20 +1,20 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { supabase } from '@/lib/supabase';
-import type { Session, User } from '@supabase/supabase-js';
+import { useCallback, useEffect, useRef, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { supabase } from "@/lib/supabase";
+import type { Session, User } from "@supabase/supabase-js";
 import {
   getActiveRoleStorageKey,
   ONBOARDING_COMPLETED_KEY,
   parseUserRole,
   type UserProfile,
   type UserRole,
-} from '@/lib/auth-types';
+} from "@/lib/auth-types";
 
 async function fetchProfile(user: User): Promise<UserProfile | null> {
   const { data, error } = await supabase
-    .from('profiles')
-    .select('id, display_name, avatar_url, bio, location, onboarding_completed')
-    .eq('id', user.id)
+    .from("profiles")
+    .select("id, display_name, avatar_url, bio, location, onboarding_completed")
+    .eq("id", user.id)
     .single();
   if (error) return null;
   return data as UserProfile;
@@ -47,28 +47,35 @@ export function useAuthState(): UseAuthStateResult {
   function runProfileFetch(user: User) {
     const requestId = ++profileRequestIdRef.current;
     fetchProfile(user)
-      .then((p) => { if (profileRequestIdRef.current === requestId) setProfile(p); })
-      .catch(() => { if (profileRequestIdRef.current === requestId) setProfile(null); });
+      .then((p) => {
+        if (profileRequestIdRef.current === requestId) setProfile(p);
+      })
+      .catch(() => {
+        if (profileRequestIdRef.current === requestId) setProfile(null);
+      });
   }
 
-  const applySession = useCallback((newSession: Session | null, prevUserId?: string | null) => {
-    const newUserId = newSession?.user.id ?? null;
-    if (newUserId !== prevUserId) {
-      setRoles([]);
-      setActiveRole(null);
-      setProfile(null);
-      setIsRoleLoading(Boolean(newUserId));
-    }
-    setSession(newSession);
-    if (newSession?.user) runProfileFetch(newSession.user);
-  }, []);
+  const applySession = useCallback(
+    (newSession: Session | null, prevUserId?: string | null) => {
+      const newUserId = newSession?.user.id ?? null;
+      if (newUserId !== prevUserId) {
+        setRoles([]);
+        setActiveRole(null);
+        setProfile(null);
+        setIsRoleLoading(Boolean(newUserId));
+      }
+      setSession(newSession);
+      if (newSession?.user) runProfileFetch(newSession.user);
+    },
+    [],
+  );
 
   useEffect(() => {
     let active = true;
     AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY)
       .then((value) => {
         if (!active) return;
-        setOnboardingCompleted(value === 'true');
+        setOnboardingCompleted(value === "true");
         setIsOnboardingLoading(false);
       })
       .catch(() => {
@@ -76,12 +83,15 @@ export function useAuthState(): UseAuthStateResult {
         setOnboardingCompleted(false);
         setIsOnboardingLoading(false);
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
     let currentUserId: string | null = null;
-    supabase.auth.getSession()
+    supabase.auth
+      .getSession()
       .then(({ data: { session: s } }) => {
         currentUserId = s?.user.id ?? null;
         applySession(s, null);
@@ -91,7 +101,9 @@ export function useAuthState(): UseAuthStateResult {
         applySession(null, null);
         setIsAuthLoading(false);
       });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, s) => {
       applySession(s, currentUserId);
       currentUserId = s?.user.id ?? null;
       setIsAuthLoading(false);
@@ -117,7 +129,9 @@ export function useAuthState(): UseAuthStateResult {
         const storedRole = parseUserRole(storedRoleValue ?? undefined);
         if (storedRole) {
           setActiveRole(storedRole);
-          setRoles((prev) => (prev.includes(storedRole) ? prev : [...prev, storedRole]));
+          setRoles((prev) =>
+            prev.includes(storedRole) ? prev : [...prev, storedRole],
+          );
         }
         setIsRoleLoading(false);
       })
@@ -125,22 +139,29 @@ export function useAuthState(): UseAuthStateResult {
         if (!active) return;
         setIsRoleLoading(false);
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [session?.user.id, activeRole]);
 
   const completeOnboarding = useCallback(async () => {
-    await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, 'true');
+    await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
     setOnboardingCompleted(true);
   }, []);
 
-  const switchRole = useCallback((role: UserRole) => {
-    setActiveRole(role);
-    setRoles((prev) => (prev.includes(role) ? prev : [...prev, role]));
-    const userId = session?.user.id;
-    if (userId) {
-      AsyncStorage.setItem(getActiveRoleStorageKey(userId), role).catch(() => {});
-    }
-  }, [session?.user.id]);
+  const switchRole = useCallback(
+    (role: UserRole) => {
+      setActiveRole(role);
+      setRoles((prev) => (prev.includes(role) ? prev : [...prev, role]));
+      const userId = session?.user.id;
+      if (userId) {
+        AsyncStorage.setItem(getActiveRoleStorageKey(userId), role).catch(
+          () => {},
+        );
+      }
+    },
+    [session?.user.id],
+  );
 
   return {
     session,

@@ -25,16 +25,16 @@ DogWalker is a two-sided marketplace mobile app connecting **Dog Owners** (who n
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Expo SDK 54+, React Native 0.81+, TypeScript (strict) |
-| Routing | **Expo Router** (file-based, typed routes enabled) |
+| Layer        | Technology                                                                          |
+| ------------ | ----------------------------------------------------------------------------------- |
+| Framework    | Expo SDK 54+, React Native 0.81+, TypeScript (strict)                               |
+| Routing      | **Expo Router** (file-based, typed routes enabled)                                  |
 | Server state | **TanStack Query (React Query)** for all Supabase data fetching, caching, mutations |
-| Client state | Minimal — colocate in components; use React Context only for auth/session |
-| Backend | **Supabase** (Postgres, Auth, Realtime, Edge Functions, Storage) |
-| Styling | **NativeWind v4** (Tailwind CSS for React Native) — use `className` prop |
-| Payments | **Stripe** (Connect marketplace model) via Supabase Edge Functions |
-| CI/CD | **GitHub Actions** with dev / staging / production environments |
+| Client state | Minimal — colocate in components; use React Context only for auth/session           |
+| Backend      | **Supabase** (Postgres, Auth, Realtime, Edge Functions, Storage)                    |
+| Styling      | **NativeWind v4** (Tailwind CSS for React Native) — use `className` prop            |
+| Payments     | **Stripe** (Connect marketplace model) via Supabase Edge Functions                  |
+| CI/CD        | **GitHub Actions** with dev / staging / production environments                     |
 
 ---
 
@@ -112,16 +112,16 @@ src/
 
 ### Core Tables
 
-| Table | Purpose |
-|-------|---------|
-| `profiles` | Extends `auth.users` — stores display name, avatar, bio, location |  
-| `user_roles` | Join table — `user_id` + `role` (owner/walker); supports dual-role accounts |
-| `dogs` | Owner's dogs — name, breed, size, age, special needs, photo |
-| `walker_profiles` | Walker-specific info — rate per walk, bio, experience, availability JSON |
-| `bookings` | Walk requests — owner, walker, dog(s), datetime, duration, status, price |
-| `messages` | Chat messages — sender, receiver, booking ref, body, timestamp |
-| `payments` | Stripe payment records — booking ref, amount, status, stripe_payment_intent_id |
-| `reviews` | Post-walk reviews — booking ref, reviewer, rating (1-5), comment |
+| Table             | Purpose                                                                        |
+| ----------------- | ------------------------------------------------------------------------------ |
+| `profiles`        | Extends `auth.users` — stores display name, avatar, bio, location              |
+| `user_roles`      | Join table — `user_id` + `role` (owner/walker); supports dual-role accounts    |
+| `dogs`            | Owner's dogs — name, breed, size, age, special needs, photo                    |
+| `walker_profiles` | Walker-specific info — rate per walk, bio, experience, availability JSON       |
+| `bookings`        | Walk requests — owner, walker, dog(s), datetime, duration, status, price       |
+| `messages`        | Chat messages — sender, receiver, booking ref, body, timestamp                 |
+| `payments`        | Stripe payment records — booking ref, amount, status, stripe_payment_intent_id |
+| `reviews`         | Post-walk reviews — booking ref, reviewer, rating (1-5), comment               |
 
 ### Key Patterns
 

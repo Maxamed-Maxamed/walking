@@ -1,15 +1,19 @@
-import '@/global.css';
-import { AuthProvider } from '../lib/auth-context';
-import { Ionicons } from '@expo/vector-icons';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Asset } from 'expo-asset';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
-import 'react-native-reanimated';
-import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
+import "@/global.css";
+import { Ionicons } from "@expo/vector-icons";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Asset } from "expo-asset";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import { useEffect, useState } from "react";
+import "react-native-reanimated";
+import {
+  SafeAreaProvider,
+  initialWindowMetrics,
+} from "react-native-safe-area-context";
+import { CustomSplashScreen } from "../components/splash-screen";
+import { AuthProvider } from "../lib/auth-context";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,7 +31,7 @@ SplashScreen.setOptions({
 SplashScreen.preventAutoHideAsync().catch(() => null);
 
 export const unstable_settings = {
-  anchor: '(onboarding)',
+  anchor: "(onboarding)",
 };
 
 const MINIMUM_SPLASH_MS = 5000;
@@ -44,8 +48,8 @@ export default function RootLayout() {
     let active = true;
 
     Asset.loadAsync([
-      require('../assets/images/logo.png'),
-      require('../assets/images/paw-print.png'),
+      require("../assets/images/logo.png"),
+      require("../assets/images/paw-print.png"),
     ])
       .catch(() => null)
       .finally(() => {
@@ -75,16 +79,18 @@ export default function RootLayout() {
     return () => clearTimeout(id);
   }, []);
 
-  const resourcesReady = ((fontsLoaded || !!fontError) && assetsLoaded) || splashTimedOut;
-  const showSplash = !(resourcesReady && minimumElapsed);
+  const resourcesReady =
+    ((fontsLoaded || !!fontError) && assetsLoaded) || splashTimedOut;
+  const showCustomSplash = !minimumElapsed;
 
   useEffect(() => {
-    if (!showSplash) {
+    if (resourcesReady) {
       SplashScreen.hideAsync().catch(() => null);
     }
-  }, [showSplash]);
+  }, [resourcesReady]);
 
-  if (showSplash) {
+  if (!resourcesReady || showCustomSplash) {
+    return <CustomSplashScreen />;
   }
 
   return (

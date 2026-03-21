@@ -55,7 +55,8 @@
           "cameraPermission": "Allow DogWalker to access your camera so you can take dog profile pictures."
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -16,24 +16,28 @@
 ## Code Style Guidelines
 
 ### Imports
+
 - Use absolute imports for external libraries (e.g., `import React from 'react'`).
 - Use relative imports for internal files (e.g., `import { Header } from '../components/Header'`).
 - Group imports: external libraries first, then internal components/utils, then styles.
 - Use **path alias** `@/` mapped to the project root (configured in tsconfig).
 
 ### Formatting
+
 - Use **Prettier** for code formatting.
 - Run `npx prettier --write .` to format the codebase.
 - Indent with 2 spaces.
 - Single quotes for strings unless embedding quotes.
 
 ### Types (TypeScript)
+
 - Use explicit types for function parameters and return values.
 - Avoid `any`; use interfaces or type aliases.
 - Use `interface` for object shapes, `type` for unions/intersections.
 - TypeScript strict mode enabled.
 
 ### Naming Conventions
+
 - **Variables/Functions**: camelCase (e.g., `fetchUser`, `userCount`).
 - **Components**: PascalCase (e.g., `UserProfile`, `LoginButton`).
 - **Constants**: UPPER_SNAKE_CASE (e.g., `MAX_RETRIES`, `API_URL`).
@@ -41,11 +45,13 @@
 - One component per file; filename uses **kebab-case**.
 
 ### Error Handling
+
 - Use try-catch for async operations.
 - Return typed errors or use error boundaries in React.
 - Log errors to console or external service (e.g., Sentry).
 
 ### React Components
+
 - Use functional components with hooks.
 - Keep components small and focused.
 - Use TypeScript interfaces for props.
@@ -53,11 +59,13 @@
 - Prefer **named functions** over arrow functions for component declarations.
 
 ### Git
+
 - Commit messages follow Conventional Commits (e.g., `feat: add login form`).
 - Branch naming: `feature/<name>`, `bugfix/<name>`.
 - Use descriptive commit messages.
 
 ### Other
+
 - No console.log in production code.
 - Document complex logic with JSDoc comments.
 - Follow existing patterns in the codebase.
@@ -66,6 +74,7 @@
 ## Cursor & Copilot Rules
 
 ### Cursor Rules
+
 - If `.cursor/rules` or `.cursorrules` exists, follow those rules.
 - **Codacy Rules** (from `.cursor/rules/codacy.mdc`):
   - After ANY successful `edit_file` or `reapply` operation, run `codacy_cli_analyze` for the edited file.
@@ -74,10 +83,11 @@
   - If vulnerabilities are found, stop and fix them before continuing.
 
 ### Copilot Instructions
+
 - If `.github/copilot-instructions.md` exists, follow those instructions.
 - **DogWalker App Specifics**:
   - Tech Stack: Expo SDK 55+, React Native 0.81+, TypeScript (strict), Expo Router, TanStack Query, Supabase, NativeWind v4, Stripe.
-  - File Structure: 
+  - File Structure:
     - `app/` for routes (Expo Router)
     - `components/ui/` for design system primitives
     - `components/owners/` and `components/walkers/` for role-specific components
@@ -94,6 +104,7 @@
 ## Project Specifics
 
 ### Auth & Role-Based Access
+
 - User signs up with email/password via Supabase Auth.
 - On signup, user selects **one or both roles**: `"owner"`, `"walker"`, or both.
 - Roles stored in a **`user_roles` join table** (`user_id`, `role`).
@@ -105,7 +116,8 @@
 - Use an `AuthProvider` context that exposes `session`, `profile`, `roles[]`, `activeRole`, `switchRole()`, `isLoading`.
 
 ### Supabase Data Model
-- **Core Tables**: 
+
+- **Core Tables**:
   - `profiles`: Extends `auth.users` — stores display name, avatar, bio, location
   - `user_roles`: Join table — `user_id` + `role` (owner/walker); supports dual-role accounts
   - `dogs`: Owner's dogs — name, breed, size, age, special needs, photo
@@ -130,9 +142,10 @@
   - Payments: read-only for both parties in the booking; mutations via Edge Functions only.
 
 ### UI & Styling
+
 - **NativeWind v4**: All styling via `className`.
 - **Design System**: Primitives in `components/ui/` (Button, Card, TextInput, Badge, Avatar).
-- **Color Tokens**: 
+- **Color Tokens**:
   - Primary: #4F46E5 (indigo-600)
   - Secondary: #10B981 (emerald-500)
   - Background: #FFFFFF / #0F172A
@@ -149,6 +162,7 @@
   - Use spacing scale consistently: `gap-2` (8px), `gap-4` (16px), `gap-6` (24px).
 
 ### Splash Screen Implementation
+
 - Expo Splash Screen is configured in app.json with splash-icon.png
 - To customize: modify app.json plugins section under "expo-splash-screen"
 - For dynamic splash screens, create a dedicated splash screen component
@@ -157,12 +171,14 @@
 - The project already has a splash screen component at `components/splash-screen.tsx`
 
 ### CI/CD
+
 - GitHub Actions for CI (TypeScript, Lint, Tests) and EAS builds.
 - Branching: `main` (prod), `develop` (staging), feature branches.
 - Secrets per environment: `SUPABASE_URL_DEV`, `SUPABASE_URL_STAGING`, `SUPABASE_URL_PROD`, etc.
 - Branch protection: require passing CI + 1 approval before merge to `develop`/`main`.
 
 ### TanStack Query Patterns
+
 - Wrap app in `QueryClientProvider` in root `_layout.tsx`.
 - Query keys: `[entity, ...params]` — e.g., `['bookings', { status: 'pending' }]`.
 - Custom hooks per domain: `useWalkers()`, `useBooking(id)`, `useCreateBooking()`.
@@ -171,6 +187,7 @@
 - Enable `refetchOnWindowFocus` and `staleTime: 5 * 60 * 1000` (5 min) as defaults.
 
 ### Stripe Payments
+
 - **Marketplace model** with Stripe Connect: owners pay, walkers receive payouts.
 - Payment flow: booking confirmed → Supabase Edge Function creates `PaymentIntent` → owner pays in-app via Stripe SDK → webhook confirms → booking status updates.
 - All Stripe server-side logic lives in **Supabase Edge Functions** (Deno/TypeScript).
@@ -178,6 +195,7 @@
 - Store `stripe_customer_id` on owner profile, `stripe_account_id` on walker profile.
 
 ### Testing
+
 - **Unit / Integration**: Jest + React Native Testing Library (RNTL).
 - **E2E**: Detox for critical user flows (signup, booking, payment).
 - Test files colocated: `__tests__/` folders next to source, or `*.test.tsx` beside the component.
@@ -185,6 +203,7 @@
 - Minimum coverage target: 70% for `lib/` and `hooks/`.
 
 ### Environment Variables
+
 - `EXPO_PUBLIC_SUPABASE_URL`
 - `EXPO_PUBLIC_SUPABASE_ANON_KEY`
 - `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY`
@@ -192,6 +211,7 @@
 - `STRIPE_WEBHOOK_SECRET` (Edge Functions only)
 
 ### Code Quality
+
 - ESLint with `eslint-config-expo` (already configured).
 - TypeScript strict mode enabled.
 - Prefer small, focused PRs over large monolithic ones.
@@ -199,4 +219,5 @@
 - Use semantic versioning (e.g., `v1.0.0`).
 
 ## Summary
+
 This guide ensures agents follow the project's specific conventions, from build commands to complex Supabase/Stripe integrations.
