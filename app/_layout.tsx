@@ -1,6 +1,4 @@
 import '@/global.css';
-
-import { SplashScreenView } from '../components/splash-screen';
 import { AuthProvider } from '../lib/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -87,7 +85,6 @@ export default function RootLayout() {
   }, [showSplash]);
 
   if (showSplash) {
-    return <SplashScreenView />;
   }
 
   return (
