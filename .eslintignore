@@ -1,5 +1,0 @@
-# Ignored by Codacy CLI (ESLint 8). ESLint 9 (flat config) ignores this file.
-babel.config.js
-eslint.config.js
-metro.config.js
-tailwind.config.js

@@ -1,0 +1,5 @@
+# Default code owner for the repository
+* @Maxamed-Maxamed
+
+# Keep repository automation and policies under explicit ownership
+/.github/ @Maxamed-Maxamed

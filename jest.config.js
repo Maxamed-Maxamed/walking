@@ -1,6 +1,6 @@
+/* global module */
 module.exports = {
   preset: "jest-expo",
-  setupFilesAfterEnv: ["@testing-library/jest-native/extend-expect"],
   testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[tj]s?(x)"],
   transform: {
     "^.+\\.(js|jsx|ts|tsx)$": "babel-jest",

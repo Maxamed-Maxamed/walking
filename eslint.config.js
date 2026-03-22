@@ -7,7 +7,13 @@ const globals = require("globals");
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ["dist/*"],
+    ignores: [
+      "dist/*",
+      "babel.config.js",
+      "eslint.config.js",
+      "metro.config.js",
+      "tailwind.config.js",
+    ],
   },
   {
     files: ["*.config.js", "*.config.cjs"],
