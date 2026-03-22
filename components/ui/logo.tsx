@@ -10,7 +10,7 @@ const DEFAULT_SIZE = 96;
 export function Logo({ size = DEFAULT_SIZE, className }: LogoProps) {
   return (
     <Image
-      source={require("@/assets/images/logo.png")}
+      source={require("@/assets/images/logo2.png")}
       style={{ width: size, height: size }}
       contentFit="contain"
       className={className}

@@ -47,10 +47,7 @@ export default function RootLayout() {
   useEffect(() => {
     let active = true;
 
-    Asset.loadAsync([
-      require("../assets/images/logo.png"),
-      require("../assets/images/paw-print.png"),
-    ])
+    Asset.loadAsync([require("../assets/images/logo2.png")])
       .catch(() => null)
       .finally(() => {
         if (active) {
