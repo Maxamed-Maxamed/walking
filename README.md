@@ -18,7 +18,7 @@ What exists in this repo today:
 - Supabase client configuration with persisted auth sessions
 - Dog data hooks for listing, creating, updating, deleting, and uploading dog photos
 - Supabase migrations for storage setup
-- Jest configuration with a basic test harness
+- Jest configuration in `jest.config.cjs` with a basic test harness
 
 What is planned but not fully implemented in the current route tree:
 
@@ -67,6 +67,7 @@ assets/
   images/              App icons, logos, splash assets
 test/
   setup.test.js        Basic Jest smoke test
+jest.config.cjs        Jest CommonJS configuration
 ```
 
 ## Getting Started

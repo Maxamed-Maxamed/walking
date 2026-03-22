@@ -11,7 +11,7 @@ npm test
 
 ## Current Test Files
 
-- `jest.config.js`
+- `jest.config.cjs`
 - `test/setup.test.js`
 
 ## Intended Test Layers
