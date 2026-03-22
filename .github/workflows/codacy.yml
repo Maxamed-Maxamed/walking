@@ -45,6 +45,9 @@ jobs:
           verbose: true
           output: results.sarif
           format: sarif
+          # The SARIF output file is generated during analysis and would otherwise
+          # be detected as an uncommitted file by Codacy CLI.
+          skip-uncommitted-files-check: true
           # Restrict to issue scanners to avoid metrics-only SARIF edge cases.
           tool: issues
           # Adjust severity of non-security issues
