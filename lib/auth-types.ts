@@ -1,10 +1,12 @@
 export type UserRole = "owner" | "walker";
 
-export const ONBOARDING_COMPLETED_KEY = "dogwalker:onboarding_completed";
-export const ACTIVE_ROLE_STORAGE_KEY_PREFIX = "dogwalker:active_role:";
+const STORAGE_NAMESPACE = "dogwalker";
+
+export const ONBOARDING_COMPLETED_STORAGE_ID = `${STORAGE_NAMESPACE}:onboarding_completed`;
+export const ACTIVE_ROLE_STORAGE_PREFIX = `${STORAGE_NAMESPACE}:active_role:`;
 
 export function getActiveRoleStorageKey(userId: string): string {
-  return `${ACTIVE_ROLE_STORAGE_KEY_PREFIX}${userId}`;
+  return `${ACTIVE_ROLE_STORAGE_PREFIX}${userId}`;
 }
 
 /** Safely parse a route param (string | string[] | undefined) into a UserRole. */

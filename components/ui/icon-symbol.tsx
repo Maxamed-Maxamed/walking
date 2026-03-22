@@ -7,19 +7,29 @@ import { OpaqueColorValue, type StyleProp, type TextStyle } from "react-native";
 
 type MaterialIconName = ComponentProps<typeof MaterialIcons>["name"];
 type SymbolName = Extract<SymbolViewProps["name"], string>;
-type IconSymbolName = keyof typeof MAPPING;
 
 /**
  * Add your SF Symbols to Material Icons mappings here.
  * - see Material Icons in the [Icons Directory](https://icons.expo.fyi).
  * - see SF Symbols in the [SF Symbols](https://developer.apple.com/sf-symbols/) app.
  */
-const MAPPING = {
-  "house.fill": "home",
-  "paperplane.fill": "send",
-  "chevron.left.forwardslash.chevron.right": "code",
-  "chevron.right": "chevron-right",
-} as const satisfies Partial<Record<SymbolName, MaterialIconName>>;
+const SYMBOL_TO_MATERIAL_ICON = [
+  ["house.fill", "home"],
+  ["paperplane.fill", "send"],
+  ["chevron.left.forwardslash.chevron.right", "code"],
+  ["chevron.right", "chevron-right"],
+] as const satisfies readonly (readonly [SymbolName, MaterialIconName])[];
+
+type IconSymbolName = (typeof SYMBOL_TO_MATERIAL_ICON)[number][0];
+
+const SYMBOL_TO_MATERIAL_ICON_MAP = new Map<IconSymbolName, MaterialIconName>(
+  SYMBOL_TO_MATERIAL_ICON,
+);
+const FALLBACK_ICON: MaterialIconName = "help";
+
+function resolveMaterialIconName(name: IconSymbolName): MaterialIconName {
+  return SYMBOL_TO_MATERIAL_ICON_MAP.get(name) ?? FALLBACK_ICON;
+}
 
 /**
  * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.
@@ -42,7 +52,7 @@ export function IconSymbol({
     <MaterialIcons
       color={color}
       size={size}
-      name={MAPPING[name]}
+      name={resolveMaterialIconName(name)}
       style={style}
     />
   );

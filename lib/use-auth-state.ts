@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 import type { Session, User } from "@supabase/supabase-js";
 import {
   getActiveRoleStorageKey,
-  ONBOARDING_COMPLETED_KEY,
+  ONBOARDING_COMPLETED_STORAGE_ID,
   parseUserRole,
   type UserProfile,
   type UserRole,
@@ -72,7 +72,7 @@ export function useAuthState(): UseAuthStateResult {
 
   useEffect(() => {
     let active = true;
-    AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY)
+    AsyncStorage.getItem(ONBOARDING_COMPLETED_STORAGE_ID)
       .then((value) => {
         if (!active) return;
         setOnboardingCompleted(value === "true");
@@ -145,7 +145,7 @@ export function useAuthState(): UseAuthStateResult {
   }, [session?.user.id, activeRole]);
 
   const completeOnboarding = useCallback(async () => {
-    await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
+    await AsyncStorage.setItem(ONBOARDING_COMPLETED_STORAGE_ID, "true");
     setOnboardingCompleted(true);
   }, []);
 
