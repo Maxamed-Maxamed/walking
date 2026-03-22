@@ -56,8 +56,29 @@ jobs:
           # This will handover control about PR rejection to the GitHub side
           max-allowed-issues: 2147483647
 
+      - name: Check SARIF upload compatibility
+        id: sarif_check
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+
+          with open("results.sarif", "r", encoding="utf-8") as f:
+              run_count = len(json.load(f).get("runs", []))
+
+          print(f"Detected {run_count} SARIF run(s).")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+              out.write(f"run_count={run_count}\n")
+          PY
+
       # Upload the SARIF file generated in the previous step
       - name: Upload SARIF results file
-        uses: github/codeql-action/upload-sarif@v3
+        if: steps.sarif_check.outputs.run_count == '1'
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
+
+      - name: Skip SARIF upload notice
+        if: steps.sarif_check.outputs.run_count != '1'
+        run: echo "Skipping SARIF upload because CodeQL upload only supports a single SARIF run per category."
