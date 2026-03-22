@@ -45,6 +45,8 @@ jobs:
           verbose: true
           output: results.sarif
           format: sarif
+          # Restrict to issue scanners to avoid metrics-only SARIF edge cases.
+          tool: issues
           # Adjust severity of non-security issues
           gh-code-scanning-compat: true
           # Force 0 exit code to allow SARIF file generation
