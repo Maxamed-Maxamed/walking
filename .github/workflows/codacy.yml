@@ -34,12 +34,18 @@ jobs:
     name: Codacy Security Scan
     runs-on: ubuntu-latest
     steps:
+      - name: Skip heavy Codacy scan on pull requests
+        if: github.event_name == 'pull_request'
+        run: echo "Skipping full Codacy security scan on pull_request to keep PR checks fast."
+
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout code
+        if: github.event_name != 'pull_request'
         uses: actions/checkout@v4
 
       # Execute Codacy Analysis CLI and generate a SARIF output with the security issues identified during the analysis
       - name: Run Codacy Analysis CLI
+        if: github.event_name != 'pull_request'
         uses: codacy/codacy-analysis-cli-action@30783d03e758713bb5ed7b79292cfb14b9dd9a4a
         with:
           verbose: true
@@ -57,6 +63,7 @@ jobs:
           max-allowed-issues: 2147483647
 
       - name: Check SARIF upload compatibility
+        if: github.event_name != 'pull_request'
         id: sarif_check
         run: |
           python3 - <<'PY'
@@ -74,11 +81,11 @@ jobs:
 
       # Upload the SARIF file generated in the previous step
       - name: Upload SARIF results file
-        if: steps.sarif_check.outputs.run_count == '1'
+        if: github.event_name != 'pull_request' && steps.sarif_check.outputs.run_count == '1'
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
 
       - name: Skip SARIF upload notice
-        if: steps.sarif_check.outputs.run_count != '1'
+        if: github.event_name != 'pull_request' && steps.sarif_check.outputs.run_count != '1'
         run: echo "Skipping SARIF upload because CodeQL upload only supports a single SARIF run per category."
