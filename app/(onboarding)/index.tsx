@@ -2,7 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Href, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
-import { Pressable, Text, useWindowDimensions, View } from "react-native";
+import {
+  Pressable,
+  Text,
+  type ImageSourcePropType,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import Animated, {
   Easing,
   FadeIn,
@@ -22,48 +28,76 @@ import { PaginationDots } from "@/components/onboarding/pagination-dots";
 import { Logo } from "@/components/ui/logo";
 import { setOnboardingCompleted } from "@/lib/onboarding-storage";
 
-/* ─── slide icon sources ─── */
-const SLIDE_ICONS = [
-  require("@/assets/icons/onboarding-map.png"),
-  require("@/assets/icons/onboarding-shield.png"),
-  require("@/assets/icons/onboarding-verified.png"),
-  require("@/assets/icons/onboarding-community.png"),
-];
-
 /* ─── slide content data ─── */
 interface OnboardingSlide {
   title: string;
   body: string;
   buttonLabel: string;
   ionicon: keyof typeof Ionicons.glyphMap;
+  iconSource: ImageSourcePropType;
 }
 
-const SLIDES: OnboardingSlide[] = [
+type SlideIndex = 0 | 1 | 2 | 3;
+
+const FIRST_SLIDE_INDEX: SlideIndex = 0;
+const LAST_SLIDE_INDEX: SlideIndex = 3;
+
+const SLIDES = [
   {
     title: "Find Your Perfect Match",
     body: "Browse hundreds of verified, background-checked walkers in your neighborhood",
     buttonLabel: "Next",
     ionicon: "map-outline",
+    iconSource: require("@/assets/icons/onboarding-map.png"),
   },
   {
     title: "Safe & Secure Payments",
     body: "Cashless payments and premium insurance for every walk. Your pet is in safe hands",
     buttonLabel: "Next",
     ionicon: "shield-checkmark-outline",
+    iconSource: require("@/assets/icons/onboarding-shield.png"),
   },
   {
     title: "Verified & Trusted Walkers",
     body: "Every walker on our platform undergoes a multi-step background check and safety training",
     buttonLabel: "Next",
     ionicon: "checkmark-done-circle-outline",
+    iconSource: require("@/assets/icons/onboarding-verified.png"),
   },
   {
     title: "Join the Pack",
     body: "Read reviews from other pet parents and see photos of happy dogs in your area",
     buttonLabel: "Get Started",
     ionicon: "people-outline",
+    iconSource: require("@/assets/icons/onboarding-community.png"),
   },
-];
+] satisfies ReadonlyArray<OnboardingSlide>;
+
+function getSlide(index: SlideIndex): OnboardingSlide {
+  switch (index) {
+    case 0:
+      return SLIDES[0];
+    case 1:
+      return SLIDES[1];
+    case 2:
+      return SLIDES[2];
+    case 3:
+      return SLIDES[3];
+  }
+}
+
+function getNextSlideIndex(index: SlideIndex): SlideIndex {
+  switch (index) {
+    case 0:
+      return 1;
+    case 1:
+      return 2;
+    case 2:
+      return 3;
+    case 3:
+      return 3;
+  }
+}
 
 /* ─── animated logo tile with teal glow ─── */
 function LogoTile() {
@@ -146,17 +180,15 @@ function CTAButton({
 /* ─── slide content with entrance animations ─── */
 function SlideContent({
   slide,
-  index,
 }: {
   slide: OnboardingSlide;
-  index: number;
 }) {
   const { width } = useWindowDimensions();
   const iconSize = Math.min(width * 0.35, 160);
 
   return (
     <Animated.View
-      key={`slide-${index}`}
+      key={slide.title}
       entering={SlideInRight.duration(350).easing(
         Easing.bezier(0.4, 0, 0.2, 1),
       )}
@@ -206,7 +238,7 @@ function SlideContent({
         className="rounded-full bg-white p-5"
       >
         <Image
-          source={SLIDE_ICONS[index]}
+          source={slide.iconSource}
           style={{ width: iconSize, height: iconSize }}
           contentFit="contain"
         />
@@ -217,11 +249,13 @@ function SlideContent({
 
 /* ─── main onboarding screen ─── */
 export default function OnboardingScreen() {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState<SlideIndex>(
+    FIRST_SLIDE_INDEX,
+  );
   const router = useRouter();
 
-  const currentSlide = SLIDES[currentIndex];
-  const isLastSlide = currentIndex === SLIDES.length - 1;
+  const currentSlide = getSlide(currentIndex);
+  const isLastSlide = currentIndex === LAST_SLIDE_INDEX;
 
   const handleSkip = useCallback(async () => {
     await setOnboardingCompleted();
@@ -233,16 +267,24 @@ export default function OnboardingScreen() {
       await setOnboardingCompleted();
       router.replace("/" as Href);
     } else {
-      setCurrentIndex((prev) => prev + 1);
+      setCurrentIndex((prev) => getNextSlideIndex(prev));
     }
   }, [isLastSlide, router]);
+
+  const handleSkipPress = useCallback(() => {
+    void handleSkip();
+  }, [handleSkip]);
+
+  const handleNextPress = useCallback(() => {
+    void handleNext();
+  }, [handleNext]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* skip button */}
       <View className="flex-row justify-end px-6 pt-2">
         <Pressable
-          onPress={handleSkip}
+          onPress={handleSkipPress}
           hitSlop={16}
           accessibilityRole="button"
           accessibilityLabel="Skip onboarding"
@@ -258,7 +300,6 @@ export default function OnboardingScreen() {
         <SlideContent
           key={currentIndex}
           slide={currentSlide}
-          index={currentIndex}
         />
       </View>
 
@@ -270,7 +311,10 @@ export default function OnboardingScreen() {
         entering={FadeInDown.delay(400).duration(500)}
         className="px-6 pb-8"
       >
-        <CTAButton label={currentSlide.buttonLabel} onPress={handleNext} />
+        <CTAButton
+          label={currentSlide.buttonLabel}
+          onPress={handleNextPress}
+        />
       </Animated.View>
     </SafeAreaView>
   );

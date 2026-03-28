@@ -4,11 +4,14 @@ import { supabase } from "@/lib/supabase";
 import type { Session, User } from "@supabase/supabase-js";
 import {
   getActiveRoleStorageKey,
-  ONBOARDING_COMPLETED_STORAGE_ID,
   parseUserRole,
   type UserProfile,
   type UserRole,
 } from "@/lib/auth-types";
+import {
+  getOnboardingCompleted,
+  setOnboardingCompleted as persistOnboardingCompleted,
+} from "@/lib/onboarding-storage";
 
 async function fetchProfile(user: User): Promise<UserProfile | null> {
   const { data, error } = await supabase
@@ -72,10 +75,10 @@ export function useAuthState(): UseAuthStateResult {
 
   useEffect(() => {
     let active = true;
-    AsyncStorage.getItem(ONBOARDING_COMPLETED_STORAGE_ID)
+    getOnboardingCompleted()
       .then((value) => {
         if (!active) return;
-        setOnboardingCompleted(value === "true");
+        setOnboardingCompleted(value);
         setIsOnboardingLoading(false);
       })
       .catch(() => {
@@ -145,7 +148,7 @@ export function useAuthState(): UseAuthStateResult {
   }, [session?.user.id, activeRole]);
 
   const completeOnboarding = useCallback(async () => {
-    await AsyncStorage.setItem(ONBOARDING_COMPLETED_STORAGE_ID, "true");
+    await persistOnboardingCompleted();
     setOnboardingCompleted(true);
   }, []);
 
