@@ -1,12 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter, type Router } from "expo-router";
+import { useRouter, type Href } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 
 const ONBOARDING_COMPLETED_KEY = "@onboarding_completed";
 
-function navigateToOnboarding(router: Router) {
-  router.replace("/(onboarding)/welcome" as any);
+function navigateToOnboarding(router: ReturnType<typeof useRouter>) {
+  router.replace("/(onboarding)/welcome" as Href);
 }
 
 export default function Index() {
