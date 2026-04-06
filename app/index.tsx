@@ -7,28 +7,41 @@ const ONBOARDING_COMPLETED_KEY = "@onboarding_completed";
 
 export default function Index() {
   const router = useRouter();
-  const [isReady, setIsReady] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkOnboardingStatus = async () => {
       try {
+        // Small delay to ensure AsyncStorage writes are complete
+        await new Promise(resolve => setTimeout(resolve, 100));
         const completed = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
+        console.log("Onboarding completed:", completed);
 
         if (!completed) {
-          router.replace("/(onboarding)" as const);
+          console.log("Redirecting to onboarding");
+          router.replace("/(onboarding)/welcome" as const);
         } else {
-          setIsReady(true);
+          console.log("Onboarding done, showing welcome");
+          if (isMounted) {
+            setIsChecking(false);
+          }
         }
       } catch (error) {
         console.error("Error checking onboarding status:", error);
-        router.replace("/(onboarding)" as const);
+        router.replace("/(onboarding)/welcome" as const);
       }
     };
 
     void checkOnboardingStatus();
+
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
 
-  if (!isReady) {
+  if (isChecking) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
         <ActivityIndicator size="large" color="#1A1A2E" />

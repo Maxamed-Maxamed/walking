@@ -30,7 +30,7 @@ SplashScreen.setOptions({
 SplashScreen.preventAutoHideAsync().catch(() => null);
 
 export const unstable_settings = {
-  anchor: "(onboarding)",
+  initialRouteName: "index",
 };
 
 const MINIMUM_SPLASH_MS = 5000;

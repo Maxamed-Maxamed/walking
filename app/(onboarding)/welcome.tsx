@@ -2,8 +2,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Href, useRouter } from "expo-router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Pressable,
   Text,
   type ImageSourcePropType,
@@ -239,24 +240,74 @@ function SlideContent({ slide }: { slide: OnboardingSlide }) {
 export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] =
     useState<SlideIndex>(FIRST_SLIDE_INDEX);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
   const router = useRouter();
+
+  // Check if onboarding was already completed on mount
+  useEffect(() => {
+    const checkAlreadyCompleted = async () => {
+      try {
+        const completed = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
+        console.log("OnboardingScreen mount - already completed:", completed);
+        if (completed) {
+          console.log("Already completed, navigating to /");
+          await new Promise(resolve => setTimeout(resolve, 300));
+          router.replace("/" as Href);
+        } else {
+          setIsChecking(false);
+        }
+      } catch (error) {
+        console.error("Error checking onboarding on mount:", error);
+        setIsChecking(false);
+      }
+    };
+    void checkAlreadyCompleted();
+  }, [router]);
 
   const currentSlide = getSlide(currentIndex);
   const isLastSlide = currentIndex === LAST_SLIDE_INDEX;
 
   const handleSkip = useCallback(async () => {
-    await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
-    router.replace("/" as Href);
-  }, [router]);
+    if (isProcessing) return;
+    setIsProcessing(true);
+    console.log("handleSkip called");
+    try {
+      await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
+      const checkValue = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
+      console.log("After setItem, value is:", checkValue);
+      console.log("Redirecting to / now...");
+      await new Promise(resolve => setTimeout(resolve, 500));
+      router.replace("/" as Href);
+      console.log("Navigate called successfully");
+    } catch (error) {
+      console.error("Error in handleSkip:", error);
+      setIsProcessing(false);
+    }
+  }, [router, isProcessing]);
 
   const handleNext = useCallback(async () => {
+    if (isProcessing) return;
+    console.log("handleNext called, isLastSlide:", isLastSlide);
+
     if (isLastSlide) {
-      await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
-      router.replace("/" as Href);
+      setIsProcessing(true);
+      try {
+        await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
+        const checkValue = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
+        console.log("After setItem, value is:", checkValue);
+        console.log("Redirecting to / now...");
+        await new Promise(resolve => setTimeout(resolve, 500));
+        router.replace("/" as Href);
+        console.log("Navigate called successfully");
+      } catch (error) {
+        console.error("Error in handleNext:", error);
+        setIsProcessing(false);
+      }
     } else {
       setCurrentIndex((prev) => getNextSlideIndex(prev));
     }
-  }, [isLastSlide, router]);
+  }, [isLastSlide, router, isProcessing]);
 
   const handleSkipPress = useCallback(() => {
     void handleSkip();
@@ -265,6 +316,15 @@ export default function OnboardingScreen() {
   const handleNextPress = useCallback(() => {
     void handleNext();
   }, [handleNext]);
+
+  // Show loading while checking on mount
+  if (isChecking) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color="#1A1A2E" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-white">
