@@ -25,7 +25,7 @@ export default function Index() {
       }
     };
 
-    checkOnboardingStatus();
+    void checkOnboardingStatus();
   }, [router]);
 
   if (!isReady) {
