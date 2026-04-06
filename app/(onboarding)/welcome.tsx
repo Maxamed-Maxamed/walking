@@ -252,7 +252,7 @@ export default function OnboardingScreen() {
         console.log("OnboardingScreen mount - already completed:", completed);
         if (completed) {
           console.log("Already completed, navigating to /");
-          await new Promise(resolve => setTimeout(resolve, 300));
+          await new Promise((resolve) => setTimeout(resolve, 300));
           router.replace("/" as Href);
         } else {
           setIsChecking(false);
@@ -277,7 +277,7 @@ export default function OnboardingScreen() {
       const checkValue = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
       console.log("After setItem, value is:", checkValue);
       console.log("Redirecting to / now...");
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       router.replace("/" as Href);
       console.log("Navigate called successfully");
     } catch (error) {
@@ -297,7 +297,7 @@ export default function OnboardingScreen() {
         const checkValue = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
         console.log("After setItem, value is:", checkValue);
         console.log("Redirecting to / now...");
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
         router.replace("/" as Href);
         console.log("Navigate called successfully");
       } catch (error) {

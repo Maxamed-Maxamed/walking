@@ -1,9 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
+import { useRouter, type Router } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 
 const ONBOARDING_COMPLETED_KEY = "@onboarding_completed";
+
+function navigateToOnboarding(router: Router) {
+  router.replace("/(onboarding)/welcome" as any);
+}
 
 export default function Index() {
   const router = useRouter();
@@ -15,13 +19,13 @@ export default function Index() {
     const checkOnboardingStatus = async () => {
       try {
         // Small delay to ensure AsyncStorage writes are complete
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         const completed = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
         console.log("Onboarding completed:", completed);
 
         if (!completed) {
           console.log("Redirecting to onboarding");
-          router.replace("/(onboarding)/welcome" as const);
+          navigateToOnboarding(router);
         } else {
           console.log("Onboarding done, showing welcome");
           if (isMounted) {
@@ -30,7 +34,7 @@ export default function Index() {
         }
       } catch (error) {
         console.error("Error checking onboarding status:", error);
-        router.replace("/(onboarding)/welcome" as const);
+        navigateToOnboarding(router);
       }
     };
 
