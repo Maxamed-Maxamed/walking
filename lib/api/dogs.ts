@@ -1,7 +1,7 @@
+import { supabase } from "@/supabase/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Crypto from "expo-crypto";
 import type { ImagePickerAsset } from "expo-image-picker";
-import { supabase } from "@/lib/supabase";
 
 export type DogSize = "small" | "medium" | "large" | "extra_large";
 

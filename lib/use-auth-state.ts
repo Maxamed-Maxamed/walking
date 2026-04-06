@@ -1,17 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { supabase } from "@/lib/supabase";
-import type { Session, User } from "@supabase/supabase-js";
 import {
-  getActiveRoleStorageKey,
-  parseUserRole,
-  type UserProfile,
-  type UserRole,
+    getActiveRoleStorageKey,
+    parseUserRole,
+    type UserProfile,
+    type UserRole,
 } from "@/lib/auth-types";
 import {
-  getOnboardingCompleted,
-  setOnboardingCompleted as persistOnboardingCompleted,
+    getOnboardingCompleted,
+    setOnboardingCompleted as persistOnboardingCompleted,
 } from "@/lib/onboarding-storage";
+import { supabase } from "@/supabase/supabase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import type { Session, User } from "@supabase/supabase-js";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 async function fetchProfile(user: User): Promise<UserProfile | null> {
   const { data, error } = await supabase

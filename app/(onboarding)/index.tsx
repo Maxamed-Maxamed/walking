@@ -71,7 +71,7 @@ const SLIDES = [
     ionicon: "people-outline",
     iconSource: require("@/assets/icons/onboarding-community.png"),
   },
-] satisfies ReadonlyArray<OnboardingSlide>;
+] satisfies readonly OnboardingSlide[];
 
 function getSlide(index: SlideIndex): OnboardingSlide {
   switch (index) {
