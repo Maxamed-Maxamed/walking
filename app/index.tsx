@@ -1,33 +1,36 @@
-import { Href, useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
-import { getOnboardingCompleted } from "@/lib/onboarding-storage";
+
+const ONBOARDING_COMPLETED_KEY = "@onboarding_completed";
 
 export default function Index() {
   const router = useRouter();
-  const [checking, setChecking] = useState(true);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    let active = true;
+    const checkOnboardingStatus = async () => {
+      try {
+        const completed = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
 
-    getOnboardingCompleted().then((completed) => {
-      if (!active) return;
-
-      if (!completed) {
-        router.replace("/(onboarding)" as Href);
-      } else {
-        setChecking(false);
+        if (!completed) {
+          router.replace("/(onboarding)" as const);
+        } else {
+          setIsReady(true);
+        }
+      } catch (error) {
+        console.error("Error checking onboarding status:", error);
+        router.replace("/(onboarding)" as const);
       }
-    });
-
-    return () => {
-      active = false;
     };
+
+    checkOnboardingStatus();
   }, [router]);
 
-  if (checking) {
+  if (!isReady) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
+      <View className="flex-1 items-center justify-center bg-background">
         <ActivityIndicator size="large" color="#1A1A2E" />
       </View>
     );

@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
 import { Text, View } from "react-native";
 import Animated, {
-    Easing,
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
-    withTiming,
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Logo } from "./ui/logo";

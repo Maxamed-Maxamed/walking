@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Href, useRouter } from "expo-router";
@@ -26,7 +27,6 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaginationDots } from "@/components/onboarding/pagination-dots";
 import { Logo } from "@/components/ui/logo";
-import { setOnboardingCompleted } from "@/lib/onboarding-storage";
 
 /* ─── slide content data ─── */
 interface OnboardingSlide {
@@ -41,6 +41,8 @@ type SlideIndex = 0 | 1 | 2 | 3;
 
 const FIRST_SLIDE_INDEX: SlideIndex = 0;
 const LAST_SLIDE_INDEX: SlideIndex = 3;
+
+const ONBOARDING_COMPLETED_KEY = "@onboarding_completed";
 
 const SLIDES = [
   {
@@ -137,13 +139,7 @@ function LogoTile() {
 }
 
 /* ─── animated CTA button ─── */
-function CTAButton({
-  label,
-  onPress,
-}: {
-  label: string;
-  onPress: () => void;
-}) {
+function CTAButton({ label, onPress }: { label: string; onPress: () => void }) {
   const scale = useSharedValue(1);
 
   const handlePressIn = () => {
@@ -168,9 +164,7 @@ function CTAButton({
         accessibilityRole="button"
         accessibilityLabel={label}
       >
-        <Text className="text-base font-semibold text-white mr-2">
-          {label}
-        </Text>
+        <Text className="text-base font-semibold text-white mr-2">{label}</Text>
         <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
       </Pressable>
     </Animated.View>
@@ -178,11 +172,7 @@ function CTAButton({
 }
 
 /* ─── slide content with entrance animations ─── */
-function SlideContent({
-  slide,
-}: {
-  slide: OnboardingSlide;
-}) {
+function SlideContent({ slide }: { slide: OnboardingSlide }) {
   const { width } = useWindowDimensions();
   const iconSize = Math.min(width * 0.35, 160);
 
@@ -192,9 +182,7 @@ function SlideContent({
       entering={SlideInRight.duration(350).easing(
         Easing.bezier(0.4, 0, 0.2, 1),
       )}
-      exiting={SlideOutLeft.duration(300).easing(
-        Easing.bezier(0.4, 0, 0.2, 1),
-      )}
+      exiting={SlideOutLeft.duration(300).easing(Easing.bezier(0.4, 0, 0.2, 1))}
       className="flex-1 items-center px-6"
     >
       {/* headline */}
@@ -249,22 +237,21 @@ function SlideContent({
 
 /* ─── main onboarding screen ─── */
 export default function OnboardingScreen() {
-  const [currentIndex, setCurrentIndex] = useState<SlideIndex>(
-    FIRST_SLIDE_INDEX,
-  );
+  const [currentIndex, setCurrentIndex] =
+    useState<SlideIndex>(FIRST_SLIDE_INDEX);
   const router = useRouter();
 
   const currentSlide = getSlide(currentIndex);
   const isLastSlide = currentIndex === LAST_SLIDE_INDEX;
 
   const handleSkip = useCallback(async () => {
-    await setOnboardingCompleted();
+    await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
     router.replace("/" as Href);
   }, [router]);
 
   const handleNext = useCallback(async () => {
     if (isLastSlide) {
-      await setOnboardingCompleted();
+      await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
       router.replace("/" as Href);
     } else {
       setCurrentIndex((prev) => getNextSlideIndex(prev));
@@ -297,10 +284,7 @@ export default function OnboardingScreen() {
 
       {/* slide content — keyed for remount animation */}
       <View className="flex-1 justify-center pt-4">
-        <SlideContent
-          key={currentIndex}
-          slide={currentSlide}
-        />
+        <SlideContent key={currentIndex} slide={currentSlide} />
       </View>
 
       {/* pagination dots */}
@@ -311,10 +295,7 @@ export default function OnboardingScreen() {
         entering={FadeInDown.delay(400).duration(500)}
         className="px-6 pb-8"
       >
-        <CTAButton
-          label={currentSlide.buttonLabel}
-          onPress={handleNextPress}
-        />
+        <CTAButton label={currentSlide.buttonLabel} onPress={handleNextPress} />
       </Animated.View>
     </SafeAreaView>
   );

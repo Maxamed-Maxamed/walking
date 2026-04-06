@@ -5,11 +5,11 @@
 DogWalker is still in active development, so support is tracked by branch rather
 than by release line.
 
-| Branch | Support Status |
-| --- | --- |
-| `main` | Active security support |
-| `develop` | Best-effort support |
-| Feature branches | Not supported |
+| Branch           | Support Status          |
+| ---------------- | ----------------------- |
+| `main`           | Active security support |
+| `develop`        | Best-effort support     |
+| Feature branches | Not supported           |
 
 ## Reporting a Vulnerability
 
