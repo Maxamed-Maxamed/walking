@@ -13,7 +13,6 @@ import {
   initialWindowMetrics,
 } from "react-native-safe-area-context";
 import { CustomSplashScreen } from "../components/splash-screen";
-import { AuthProvider } from "../lib/auth-context";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,7 +30,7 @@ SplashScreen.setOptions({
 SplashScreen.preventAutoHideAsync().catch(() => null);
 
 export const unstable_settings = {
-  anchor: "(onboarding)",
+  initialRouteName: "index",
 };
 
 const MINIMUM_SPLASH_MS = 5000;
@@ -92,18 +91,13 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(onboarding)" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(owner)" />
-            <Stack.Screen name="(walker)" />
-          </Stack>
-          <StatusBar style="auto" />
-        </SafeAreaProvider>
-      </AuthProvider>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(onboarding)" />
+        </Stack>
+        <StatusBar style="auto" />
+      </SafeAreaProvider>
     </QueryClientProvider>
   );
 }

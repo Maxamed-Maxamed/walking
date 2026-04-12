@@ -52,3 +52,5 @@ app-example
 
 #Ignore cursor AI rules
 .cursor\rules\codacy.mdc
+
+/lib/generated/prisma

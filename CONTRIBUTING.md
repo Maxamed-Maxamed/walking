@@ -19,7 +19,7 @@ npm install
 ```
 
 2. Copy `.env.example` to `.env.local` and fill in the values required by the
-current client setup:
+   current client setup:
 
 ```bash
 cp .env.example .env.local

@@ -4,7 +4,7 @@ Describe the change in one or two sentences.
 
 ## What Changed
 
-- 
+-
 
 ## Why
 
