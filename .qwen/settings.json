@@ -1,6 +1,0 @@
-{
-  "permissions": {
-    "allow": ["Bash(move *)"]
-  },
-  "$version": 3
-}
