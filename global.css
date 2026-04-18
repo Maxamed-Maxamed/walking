@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    background-color: #ffffff;
+    @apply bg-gray-50;
     font-family: "Trebuchet MS", "Gill Sans MT", "Segoe UI", sans-serif;
   }
 }

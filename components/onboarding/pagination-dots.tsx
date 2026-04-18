@@ -1,9 +1,9 @@
 import React from "react";
 import { View } from "react-native";
 import Animated, {
+  Easing,
   useAnimatedStyle,
   withTiming,
-  Easing,
 } from "react-native-reanimated";
 
 interface PaginationDotsProps {
@@ -12,10 +12,12 @@ interface PaginationDotsProps {
 }
 
 const DOT_SIZE = 8;
-const ACTIVE_WIDTH = 24;
+const ACTIVE_WIDTH = 28;
 const DOT_GAP = 8;
-const ACTIVE_COLOR = "#1A1A2E";
-const INACTIVE_COLOR = "#E5E7EB";
+/** Matches tailwind `onboarding.headline` */
+const ACTIVE_COLOR = "#111827";
+/** Matches tailwind `onboarding.dot` */
+const INACTIVE_COLOR = "#e5e7eb";
 
 function Dot({ isActive }: { isActive: boolean }) {
   const animatedStyle = useAnimatedStyle(() => {
@@ -28,7 +30,7 @@ function Dot({ isActive }: { isActive: boolean }) {
         duration: 300,
         easing: Easing.bezier(0.4, 0, 0.2, 1),
       }),
-      opacity: withTiming(isActive ? 1 : 0.6, {
+      opacity: withTiming(isActive ? 1 : 0.55, {
         duration: 300,
       }),
     };
@@ -50,7 +52,11 @@ function Dot({ isActive }: { isActive: boolean }) {
 
 export function PaginationDots({ total, currentIndex }: PaginationDotsProps) {
   return (
-    <View className="flex-row items-center justify-center py-6">
+    <View
+      className="flex-row items-center justify-center py-5"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+    >
       {Array.from({ length: total }).map((_, index) => (
         <Dot key={index} isActive={index === currentIndex} />
       ))}

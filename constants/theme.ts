@@ -8,21 +8,22 @@ import { Platform } from "react-native";
 const tintColorLight = "#0a7ea4";
 const tintColorDark = "#fff";
 
+/** Tailwind Gray-aligned neutrals (see tailwind.config.js) */
 export const Colors = {
   light: {
-    text: "#11181C",
-    background: "#fff",
+    text: "#111827",
+    background: "#f9fafb",
     tint: tintColorLight,
-    icon: "#687076",
-    tabIconDefault: "#687076",
+    icon: "#6b7280",
+    tabIconDefault: "#6b7280",
     tabIconSelected: tintColorLight,
   },
   dark: {
-    text: "#ECEDEE",
-    background: "#151718",
+    text: "#f3f4f6",
+    background: "#030712",
     tint: tintColorDark,
-    icon: "#9BA1A6",
-    tabIconDefault: "#9BA1A6",
+    icon: "#9ca3af",
+    tabIconDefault: "#9ca3af",
     tabIconSelected: tintColorDark,
   },
 };

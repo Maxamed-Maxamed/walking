@@ -6,6 +6,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
+  ScrollView,
   Text,
   type ImageSourcePropType,
   useWindowDimensions,
@@ -20,21 +21,17 @@ import Animated, {
   SlideOutLeft,
   useAnimatedStyle,
   useSharedValue,
-  withRepeat,
-  withSequence,
   withTiming,
-  ZoomIn,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PaginationDots } from "@/components/onboarding/pagination-dots";
 import { Logo } from "@/components/ui/logo";
+import { useReduceMotion } from "@/hooks/use-reduce-motion";
 
-/* ─── slide content data ─── */
 interface OnboardingSlide {
   title: string;
   body: string;
   buttonLabel: string;
-  ionicon: keyof typeof Ionicons.glyphMap;
   iconSource: ImageSourcePropType;
 }
 
@@ -47,31 +44,27 @@ const ONBOARDING_COMPLETED_KEY = "@onboarding_completed";
 
 const SLIDES = [
   {
-    title: "Find Your Perfect Match",
-    body: "Browse hundreds of verified, background-checked walkers in your neighborhood",
+    title: "Find your perfect match",
+    body: "Browse verified walkers near you and book walks that fit your schedule.",
     buttonLabel: "Next",
-    ionicon: "map-outline",
     iconSource: require("@/assets/icons/onboarding-map.png"),
   },
   {
-    title: "Safe & Secure Payments",
-    body: "Cashless payments and premium insurance for every walk. Your pet is in safe hands",
+    title: "Safe, cashless payments",
+    body: "Pay in the app with clear pricing—no awkward handoffs at the door.",
     buttonLabel: "Next",
-    ionicon: "shield-checkmark-outline",
     iconSource: require("@/assets/icons/onboarding-shield.png"),
   },
   {
-    title: "Verified & Trusted Walkers",
-    body: "Every walker on our platform undergoes a multi-step background check and safety training",
+    title: "Walkers you can trust",
+    body: "Profiles, reviews, and safety checks help you choose with confidence.",
     buttonLabel: "Next",
-    ionicon: "checkmark-done-circle-outline",
     iconSource: require("@/assets/icons/onboarding-verified.png"),
   },
   {
-    title: "Join the Pack",
-    body: "Read reviews from other pet parents and see photos of happy dogs in your area",
-    buttonLabel: "Get Started",
-    ionicon: "people-outline",
+    title: "Join the pack",
+    body: "See photos and updates from walks so you always know how your dog is doing.",
+    buttonLabel: "Get started",
     iconSource: require("@/assets/icons/onboarding-community.png"),
   },
 ] satisfies readonly OnboardingSlide[];
@@ -102,49 +95,19 @@ function getNextSlideIndex(index: SlideIndex): SlideIndex {
   }
 }
 
-/* ─── animated logo tile with teal glow ─── */
-function LogoTile() {
-  const pulseScale = useSharedValue(1);
-
-  React.useEffect(() => {
-    pulseScale.value = withRepeat(
-      withSequence(
-        withTiming(1.04, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
-      ),
-      -1,
-    );
-  }, [pulseScale]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pulseScale.value }],
-  }));
-
-  return (
-    <Animated.View
-      style={[
-        animatedStyle,
-        {
-          shadowColor: "#2DD4A8",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.35,
-          shadowRadius: 16,
-          elevation: 8,
-        },
-      ]}
-      className="rounded-3xl bg-white p-1"
-    >
-      <Logo size={80} className="rounded-2xl" />
-    </Animated.View>
-  );
-}
-
-/* ─── animated CTA button ─── */
-function CTAButton({ label, onPress }: { label: string; onPress: () => void }) {
+function CTAButton({
+  label,
+  onPress,
+  isLastSlide,
+}: {
+  label: string;
+  onPress: () => void;
+  isLastSlide: boolean;
+}) {
   const scale = useSharedValue(1);
 
   const handlePressIn = () => {
-    scale.value = withTiming(0.96, { duration: 100 });
+    scale.value = withTiming(0.98, { duration: 100 });
   };
 
   const handlePressOut = () => {
@@ -161,104 +124,131 @@ function CTAButton({ label, onPress }: { label: string; onPress: () => void }) {
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        className="flex-row items-center justify-center rounded-2xl bg-onboarding-headline py-4 px-8"
+        className="min-h-[52px] flex-row items-center justify-center rounded-2xl bg-onboarding-headline px-8 py-4"
         accessibilityRole="button"
         accessibilityLabel={label}
+        accessibilityHint={
+          isLastSlide
+            ? "Completes onboarding and continues to the app"
+            : "Goes to the next onboarding screen"
+        }
       >
-        <Text className="text-base font-semibold text-white mr-2">{label}</Text>
+        <Text className="mr-2 text-base font-semibold text-white">{label}</Text>
         <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
       </Pressable>
     </Animated.View>
   );
 }
 
-/* ─── slide content with entrance animations ─── */
-function SlideContent({ slide }: { slide: OnboardingSlide }) {
+function SlideContent({
+  slide,
+  slideIndex,
+  total,
+  reduceMotion,
+}: {
+  slide: OnboardingSlide;
+  slideIndex: number;
+  total: number;
+  reduceMotion: boolean;
+}) {
   const { width } = useWindowDimensions();
-  const iconSize = Math.min(width * 0.35, 160);
+  const iconSize = Math.min(width * 0.42, 200);
+
+  const a11yLabel = `Step ${slideIndex + 1} of ${total}. ${slide.title}. ${slide.body}`;
+
+  const enter = reduceMotion
+    ? undefined
+    : SlideInRight.duration(320).easing(Easing.bezier(0.4, 0, 0.2, 1));
+  const exit = reduceMotion
+    ? undefined
+    : SlideOutLeft.duration(260).easing(Easing.bezier(0.4, 0, 0.2, 1));
 
   return (
     <Animated.View
       key={slide.title}
-      entering={SlideInRight.duration(350).easing(
-        Easing.bezier(0.4, 0, 0.2, 1),
-      )}
-      exiting={SlideOutLeft.duration(300).easing(Easing.bezier(0.4, 0, 0.2, 1))}
-      className="flex-1 items-center px-6"
+      entering={enter}
+      exiting={exit}
+      className="flex-1 px-6"
     >
-      {/* headline */}
-      <Animated.View
-        entering={FadeInUp.delay(100).duration(400)}
-        className="w-full mb-6"
+      <View
+        accessible
+        accessibilityLabel={a11yLabel}
+        className="flex-1 justify-center"
       >
-        <Text className="text-3xl font-bold text-onboarding-headline text-left tracking-tight">
-          {slide.title}
+        <View className="mb-8 overflow-hidden rounded-[28px] border border-border bg-white p-6 shadow-sm">
+          <View className="mb-6 items-center">
+            <View
+              className="rounded-2xl p-4"
+              style={{
+                shadowColor: "#2DD4A8",
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.12,
+                shadowRadius: 24,
+                elevation: 6,
+              }}
+            >
+              <Image
+                source={slide.iconSource}
+                style={{ width: iconSize, height: iconSize }}
+                contentFit="contain"
+                accessible={false}
+              />
+            </View>
+          </View>
+          {reduceMotion ? (
+            <>
+              <Text className="mb-3 font-display text-3xl font-bold leading-tight tracking-tight text-onboarding-headline">
+                {slide.title}
+              </Text>
+              <Text className="text-base leading-6 text-onboarding-body">
+                {slide.body}
+              </Text>
+            </>
+          ) : (
+            <>
+              <Animated.View entering={FadeInUp.delay(80).duration(320)}>
+                <Text className="mb-3 font-display text-3xl font-bold leading-tight tracking-tight text-onboarding-headline">
+                  {slide.title}
+                </Text>
+              </Animated.View>
+              <Animated.View entering={FadeInDown.delay(140).duration(340)}>
+                <Text className="text-base leading-6 text-onboarding-body">
+                  {slide.body}
+                </Text>
+              </Animated.View>
+            </>
+          )}
+        </View>
+
+        <Text
+          className="text-center text-sm font-medium text-muted"
+          accessibilityElementsHidden
+        >
+          {slideIndex + 1} / {total}
         </Text>
-      </Animated.View>
-
-      {/* logo tile */}
-      <Animated.View
-        entering={FadeIn.delay(150).duration(400)}
-        className="mb-8"
-      >
-        <LogoTile />
-      </Animated.View>
-
-      {/* body text */}
-      <Animated.View
-        entering={FadeInDown.delay(200).duration(400)}
-        className="mb-8 px-4"
-      >
-        <Text className="text-base text-onboarding-body text-center leading-6">
-          {slide.body}
-        </Text>
-      </Animated.View>
-
-      {/* themed icon */}
-      <Animated.View
-        entering={ZoomIn.delay(300).duration(500).springify()}
-        style={{
-          shadowColor: "#2DD4A8",
-          shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.3,
-          shadowRadius: 20,
-          elevation: 6,
-        }}
-        className="rounded-full bg-white p-5"
-      >
-        <Image
-          source={slide.iconSource}
-          style={{ width: iconSize, height: iconSize }}
-          contentFit="contain"
-        />
-      </Animated.View>
+      </View>
     </Animated.View>
   );
 }
 
-/* ─── main onboarding screen ─── */
 export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] =
     useState<SlideIndex>(FIRST_SLIDE_INDEX);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
   const router = useRouter();
+  const reduceMotion = useReduceMotion();
 
-  // Check if onboarding was already completed on mount
   useEffect(() => {
     const checkAlreadyCompleted = async () => {
       try {
         const completed = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
-        console.log("OnboardingScreen mount - already completed:", completed);
         if (completed) {
-          console.log("Already completed, navigating to /");
-          await new Promise((resolve) => setTimeout(resolve, 300));
           router.replace("/" as Href);
         } else {
           setIsChecking(false);
         }
-      } catch (error) {
-        console.error("Error checking onboarding on mount:", error);
+      } catch {
         setIsChecking(false);
       }
     };
@@ -268,46 +258,35 @@ export default function OnboardingScreen() {
   const currentSlide = getSlide(currentIndex);
   const isLastSlide = currentIndex === LAST_SLIDE_INDEX;
 
+  const finishOnboarding = useCallback(async () => {
+    await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
+    router.replace("/" as Href);
+  }, [router]);
+
   const handleSkip = useCallback(async () => {
     if (isProcessing) return;
     setIsProcessing(true);
-    console.log("handleSkip called");
     try {
-      await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
-      const checkValue = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
-      console.log("After setItem, value is:", checkValue);
-      console.log("Redirecting to / now...");
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      router.replace("/" as Href);
-      console.log("Navigate called successfully");
-    } catch (error) {
-      console.error("Error in handleSkip:", error);
+      await finishOnboarding();
+    } catch {
       setIsProcessing(false);
     }
-  }, [router, isProcessing]);
+  }, [finishOnboarding, isProcessing]);
 
   const handleNext = useCallback(async () => {
     if (isProcessing) return;
-    console.log("handleNext called, isLastSlide:", isLastSlide);
 
     if (isLastSlide) {
       setIsProcessing(true);
       try {
-        await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
-        const checkValue = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
-        console.log("After setItem, value is:", checkValue);
-        console.log("Redirecting to / now...");
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        router.replace("/" as Href);
-        console.log("Navigate called successfully");
-      } catch (error) {
-        console.error("Error in handleNext:", error);
+        await finishOnboarding();
+      } catch {
         setIsProcessing(false);
       }
     } else {
-      setCurrentIndex((prev) => getNextSlideIndex(prev));
+      setCurrentIndex(getNextSlideIndex(currentIndex));
     }
-  }, [isLastSlide, router, isProcessing]);
+  }, [currentIndex, finishOnboarding, isLastSlide, isProcessing]);
 
   const handleSkipPress = useCallback(() => {
     void handleSkip();
@@ -317,46 +296,63 @@ export default function OnboardingScreen() {
     void handleNext();
   }, [handleNext]);
 
-  // Show loading while checking on mount
   if (isChecking) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#1A1A2E" />
+      <SafeAreaView className="flex-1 items-center justify-center bg-background">
+        <ActivityIndicator size="large" color="#111827" />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      {/* skip button */}
-      <View className="flex-row justify-end px-6 pt-2">
+    <SafeAreaView className="flex-1 bg-background">
+      <View className="flex-row items-center justify-between px-6 pb-2 pt-1">
+        <Logo size={44} className="rounded-xl" />
         <Pressable
           onPress={handleSkipPress}
           hitSlop={16}
           accessibilityRole="button"
           accessibilityLabel="Skip onboarding"
         >
-          <Text className="text-base font-medium text-onboarding-body">
+          <Text className="text-base font-semibold text-onboarding-body">
             Skip
           </Text>
         </Pressable>
       </View>
 
-      {/* slide content — keyed for remount animation */}
-      <View className="flex-1 justify-center pt-4">
-        <SlideContent key={currentIndex} slide={currentSlide} />
-      </View>
-
-      {/* pagination dots */}
-      <PaginationDots total={SLIDES.length} currentIndex={currentIndex} />
-
-      {/* CTA button */}
-      <Animated.View
-        entering={FadeInDown.delay(400).duration(500)}
-        className="px-6 pb-8"
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 8 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <CTAButton label={currentSlide.buttonLabel} onPress={handleNextPress} />
-      </Animated.View>
+        <SlideContent
+          key={currentIndex}
+          slide={currentSlide}
+          slideIndex={currentIndex}
+          total={SLIDES.length}
+          reduceMotion={reduceMotion}
+        />
+      </ScrollView>
+
+      <View className="border-t border-border bg-background px-6 pb-6 pt-2">
+        <PaginationDots total={SLIDES.length} currentIndex={currentIndex} />
+        {!reduceMotion ? (
+          <Animated.View entering={FadeIn.duration(280)}>
+            <CTAButton
+              label={currentSlide.buttonLabel}
+              onPress={handleNextPress}
+              isLastSlide={isLastSlide}
+            />
+          </Animated.View>
+        ) : (
+          <CTAButton
+            label={currentSlide.buttonLabel}
+            onPress={handleNextPress}
+            isLastSlide={isLastSlide}
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
 }
